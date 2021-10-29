@@ -41,7 +41,7 @@ CREATE TABLE projet.paes (
 
 CREATE TABLE projet.acquis (
     etudiant    int NOT NULL,
-    ue          int NOT NULL,
+    ue          char(8) NOT NULL,
 
     CONSTRAINT etudiant_acquis_fkey FOREIGN KEY(etudiant)
         REFERENCES projet.etudiants(numero_etudiant),
@@ -51,8 +51,8 @@ CREATE TABLE projet.acquis (
 );
 
 CREATE TABLE projet.prerequis (
-    ue_qui_requiert   int NOT NULL CHECK (ue_qui_requiert<>ue_requise),
-    ue_requise        int NOT NULL CHECK (ue_qui_requiert<>ue_requise),
+    ue_qui_requiert   char(8) NOT NULL CHECK (ue_qui_requiert<>ue_requise),
+    ue_requise        char(8) NOT NULL CHECK (ue_qui_requiert<>ue_requise),
 
     CONSTRAINT requiert_fkey FOREIGN KEY(ue_qui_requiert)
         REFERENCES projet.unites_enseignement(code),
@@ -62,7 +62,7 @@ CREATE TABLE projet.prerequis (
 );
 
 CREATE TABLE projet.pae_ue (
-    ue  int NOT NULL,
+    ue  char(8) NOT NULL,
     pae int NOT NULL,
 
     CONSTRAINT ue_fkey FOREIGN KEY(ue)
