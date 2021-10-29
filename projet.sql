@@ -1,6 +1,7 @@
 DROP SCHEMA IF EXISTS projet CASCADE;
 CREATE SCHEMA projet;
 
+
 CREATE TABLE projet.blocs (
     numero_bloc SERIAL PRIMARY KEY,
     libelle     char(5) NOT NULL CHECK (libelle SIMILAR TO 'bloc[123]') unique
@@ -72,3 +73,24 @@ CREATE TABLE projet.pae_ue (
         REFERENCES projet.paes(numero_pae),
     PRIMARY KEY (ue, pae)
 );
+
+
+-------------------Application centrale
+
+--Ajouter une UE
+--Ajouter un prerequis
+--Ajouter un etudiant
+--Ajouter une UE validee pour un etudiant
+--Afficher tout les etudiant d'un bloc
+--Afficher le nombre de credit du PAE pour un etudiant
+--Afficher tout les etudiant dont le PEA n'est pas valider
+--Afficher toutes les UE d'un bloc
+
+-------------------Application etudiant
+
+--Ajouter une UE a son PAE
+--Enlever une UE a son PAE
+--Valider son PAE
+--Afficher les UE auxquelles un etudiant peut s'inscrire
+--Afficher son PAE
+--Reinitialiser son PAE
