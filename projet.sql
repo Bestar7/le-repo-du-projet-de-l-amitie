@@ -3,14 +3,14 @@ CREATE SCHEMA projet;
 
 CREATE TABLE projet.blocs (
     numero_bloc SERIAL PRIMARY KEY,
-    libelle     char(5) NOT NULL CHECK (libelle SIMILAR TO 'bloc[123]')
+    libelle     char(5) NOT NULL CHECK (libelle SIMILAR TO 'bloc[123]') unique
 );
 
 CREATE TABLE projet.etudiants (
     numero_etudiant SERIAL PRIMARY KEY,
     nom             varchar(100) NOT NULL CHECK (nom<>''),
     prenom          varchar(100) NOT NULL CHECK (prenom<>''),
-    email           varchar(100) NOT NULL CHECK (email SIMILAR TO '*@*.*'),
+    email           varchar(100) NOT NULL CHECK (email SIMILAR TO '*@*.*') unique,
     mdp             varchar(100) NOT NULL CHECK (mdp<>''),
     nbr_credit_valide int NOT NULL DEFAULT 0 CHECK (nbr_credit_valide>=0),
     numero_bloc     int NULL,
