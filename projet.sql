@@ -20,7 +20,7 @@ CREATE TABLE projet.etudiants (
 );
 
 CREATE TABLE projet.unites_enseignement (
-    code        SERIAL PRIMARY KEY,
+    code        char(8) PRIMARY KEY CHECK (nom SIMILAR TO 'BINV[123]*'),
     nom         varchar(100) NOT NULL CHECK (nom<>''),
     nbr_credit  int NOT NULL CHECK (nbr_credit>0),
     numero_bloc int NOT NULL,
