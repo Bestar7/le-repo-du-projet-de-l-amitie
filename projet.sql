@@ -3,7 +3,7 @@ CREATE SCHEMA projet;
 
 CREATE TABLE projet.blocs (
     numero_bloc SERIAL PRIMARY KEY,
-    libelle     char(5) NOT NULL CHECK (libelle<>'')
+    libelle     char(5) NOT NULL CHECK (libelle SIMILAR TO 'bloc[123]')
 );
 
 CREATE TABLE projet.etudiants (
@@ -12,7 +12,7 @@ CREATE TABLE projet.etudiants (
     prenom          varchar(100) NOT NULL CHECK (prenom<>''),
     email           varchar(100) NOT NULL CHECK (email SIMILAR TO '*@*.*'),
     mdp             varchar(100) NOT NULL CHECK (mdp<>''),
-    nbr_credit      int NOT NULL DEFAULT 0,
+    nbr_credit_valide int NOT NULL DEFAULT 0 CHECK (nbr_credit_valide>=0),
     numero_bloc     int NULL,
 
     CONSTRAINT bloc_etudiant_fkey FOREIGN KEY(numero_bloc)
@@ -23,6 +23,7 @@ CREATE TABLE projet.unites_enseignement (
     code        char(8) PRIMARY KEY CHECK (nom SIMILAR TO 'BINV[123]*'),
     nom         varchar(100) NOT NULL CHECK (nom<>''),
     nbr_credit  int NOT NULL CHECK (nbr_credit>0),
+    nbr_inscrit int NOT NULL DEFAULT 0 CHECK (nbr_inscrit>=0),
     numero_bloc int NOT NULL,
 
     CONSTRAINT bloc_cours_fkey FOREIGN KEY(numero_bloc)
@@ -32,7 +33,7 @@ CREATE TABLE projet.unites_enseignement (
 CREATE TABLE projet.paes (
     numero_pae          SERIAL PRIMARY KEY,
     etudiant            int NOT NULL,
-    nbr_credit_total    int NOT NULL DEFAULT 0 CHECK (nbr_credit_total<=74),
+    nbr_credit_total    int NOT NULL DEFAULT 0 CHECK (nbr_credit_total<=74 AND nbr_credit_total>=0),
     validation          bool NOT NULL DEFAULT false,
 
     CONSTRAINT pae_etudiant_fkey FOREIGN KEY(etudiant)
