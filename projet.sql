@@ -32,8 +32,7 @@ CREATE TABLE projet.unites_enseignement (
 );
 
 CREATE TABLE projet.paes (
-    numero_pae          SERIAL PRIMARY KEY,
-    etudiant            int NOT NULL,
+    etudiant            int PRIMARY KEY,
     nbr_credit_total    int NOT NULL DEFAULT 0 CHECK (nbr_credit_total<=74 AND nbr_credit_total>=0),
     validation          bool NOT NULL DEFAULT false,
 
@@ -70,7 +69,7 @@ CREATE TABLE projet.pae_ue (
     CONSTRAINT ue_fkey FOREIGN KEY(ue)
         REFERENCES projet.unites_enseignement(code),
     CONSTRAINT pae_fkey FOREIGN KEY(pae)
-        REFERENCES projet.paes(numero_pae),
+        REFERENCES projet.paes(etudiant),
     PRIMARY KEY (ue, pae)
 );
 
@@ -78,6 +77,7 @@ CREATE TABLE projet.pae_ue (
 -------------------Application centrale
 
 --Ajouter une UE
+
 --Ajouter un prerequis
 --Ajouter un etudiant
 --Ajouter une UE validee pour un etudiant
