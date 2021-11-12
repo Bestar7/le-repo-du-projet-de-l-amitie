@@ -98,11 +98,11 @@ CREATE TABLE projet.pae_ue (
 CREATE OR REPLACE FUNCTION projet.update_nbr_credit_valide() RETURNS TRIGGER AS $$
 DECLARE
 BEGIN
-    --incremente le destinataire
+    --ajoute les credit si acqui
     UPDATE projet.etudiants
-    SET nbr_credit_valide = nbr_credit_valide+
+    SET nbr_credit_valide = nbr_credit_valide +
                             (SELECT ue.nbr_credit
-                            FROM unites_enseignement ue
+                            FROM projet.unites_enseignement ue
                             WHERE ue.code = NEW.ue)
     WHERE etudiants.numero_etudiant = NEW.etudiant;
 
@@ -111,6 +111,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 --trigger pour  future virements
-CREATE TRIGGER trigger_update_nbr_credit_valide
+CREATE TRIGGER trigger_nbr_credit_valide
 AFTER INSERT ON projet.acquis
 FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_credit_valide();
