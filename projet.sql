@@ -110,6 +110,48 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trigger_count_nbr_credit_total AFTER INSERT ON projet.paes
     FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_credit_total();
 
+--validation
+CREATE OR REPLACE FUNCTION projet.update_validation() RETURNS TRIGGER AS $$
+DECLARE
+    ue_valide RECORD;
+    credit_total_valide int;
+    credit_total_pae int;
+    bloc int;
+BEGIN
+    --somme total des ue reussi depasse 180 credit
+    --somme du pae depasse 75 credit
+    --si pas 45 credit validee pas plus de 60 crdit au pae
+    --nbre de credit entre 55 et 74 cedits
+    --deternimer le boc
+        --1 => moins de 30 credit valide
+        --3 => annee diplomatoire
+
+    SELECT a.* FROM projet.acquis a, projet.paes p
+    WHERE p.etudiant = a.etudiant
+    INTO ue_valide;
+
+    SELECT SUM(ue.nbr_credit) FROM projet.unites_enseignement ue, projet.acquis a, projet.paes p
+    WHERE ue.code=a.ue AND a.etudiant=p.etudiant
+    INTO credit_total_valide;
+
+    SELECT p.nbr_credit_total FROM projet.paes p
+    INTO credit_total_pae;
+
+    IF (credit_total_valide < 30)THEN
+        bloc=1;
+    ELSE
+        IF(credit_total_valide + credit_total_pae == 180)THEN
+            bloc=3;
+        ELSE
+            bloc=2;
+        END IF;
+    END IF;
+
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_valider_validation BEFORE UPDATE OF validation ON projet.paes
+    FOR EACH ROW EXECUTE PROCEDURE projet.update_validation();
 
 -------------------Application centrale
 
