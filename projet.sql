@@ -111,33 +111,54 @@ CREATE TRIGGER trigger_count_nbr_credit_total AFTER INSERT ON projet.paes
     FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_credit_total();
 
 --validation
-CREATE OR REPLACE FUNCTION projet.update_validation() RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION projet.update_validation(etudiant_num INTEGER) RETURNS VOID AS $$
 DECLARE
     ue_valide RECORD;
     credit_total_valide int;
     credit_total_pae int;
     bloc int;
 BEGIN
-    --somme total des ue reussi depasse 180 credit
-    --somme du pae depasse 75 credit
-    --si pas 45 credit validee pas plus de 60 crdit au pae
-    --nbre de credit entre 55 et 74 cedits
-    --deternimer le boc
-        --1 => moins de 30 credit valide
-        --3 => annee diplomatoire
+    --pas deja valide
+    IF(SELECT p.validation FROM projet.paes p WHERE p.etudiant = etudiant_num) THEN
+        RAISE 'PAE deja valide';
+    end if;
 
+
+    --ues valide par eleve
     SELECT a.* FROM projet.acquis a, projet.paes p
-    WHERE p.etudiant = a.etudiant
+    WHERE p.etudiant = a.etudiant AND etudiant_num = p.etudiant
     INTO ue_valide;
 
-    SELECT SUM(ue.nbr_credit) FROM projet.unites_enseignement ue, projet.acquis a, projet.paes p
-    WHERE ue.code=a.ue AND a.etudiant=p.etudiant
+    --nombre credit deja valide
+    SELECT e.nbr_credit_valide FROM projet.etudiants e
+    WHERE etudiant_num = e.numero_etudiant
     INTO credit_total_valide;
 
+    --nombre credit dans le pae
     SELECT p.nbr_credit_total FROM projet.paes p
+    WHERE etudiant_num = p.etudiant
     INTO credit_total_pae;
 
-    IF (credit_total_valide < 30)THEN
+    --verification du nombre de credit total du pae
+    IF(credit_total_valide <= 30) THEN
+        IF(credit_total_pae > 60) THEN
+            RAISE 'Vous ne pouvez pas avoir plus de 60 credits quand vous avez valide moins de 30 credit';
+        END IF;
+    END IF;
+    IF(credit_total_valide + credit_total_pae < 180) THEN
+        IF(credit_total_valide < 45 AND credit_total_pae > 60) THEN
+            RAISE 'Vous ne pouvez pas avoir plus de 60 credit a votre pae quand vous avez valide moins de 45 credit';
+        END IF;
+        IF(credit_total_pae > 75 OR credit_total_pae < 55) THEN
+            RAISE 'Vous devez avoir entre 55 et 74 credit a votre pae';
+        END IF;
+    END IF;
+    IF(credit_total_pae + credit_total_valide > 180) THEN
+        RAISE 'Vous ne pouvez pas avoir plus de 180 a pouvoir valide au total';
+    END IF;
+
+    --determination du bloc
+    IF (credit_total_valide <= 30)THEN
         bloc=1;
     ELSE
         IF(credit_total_valide + credit_total_pae == 180)THEN
@@ -147,11 +168,18 @@ BEGIN
         END IF;
     END IF;
 
+    --affectation du bloc a l'etudiant
+    UPDATE projet.etudiants
+    SET numero_bloc = bloc
+    WHERE numero_etudiant = etudiant_num;
+
+    --validation du pae
+    UPDATE projet.paes
+    SET validation = TRUE
+    WHERE etudiant = etudiant_num;
+
 END;
 $$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trigger_valider_validation BEFORE UPDATE OF validation ON projet.paes
-    FOR EACH ROW EXECUTE PROCEDURE projet.update_validation();
 
 -------------------Application centrale
 
