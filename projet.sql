@@ -64,20 +64,56 @@ CREATE TABLE projet.prerequis (
 
 CREATE TABLE projet.pae_ue (
     ue  char(8) NOT NULL,
-    pae int NOT NULL,
+    etudiant int NOT NULL,
 
     CONSTRAINT ue_fkey FOREIGN KEY(ue)
         REFERENCES projet.unites_enseignement(code),
-    CONSTRAINT pae_fkey FOREIGN KEY(pae)
+    CONSTRAINT pae_fkey FOREIGN KEY(etudiant)
         REFERENCES projet.paes(etudiant),
-    PRIMARY KEY (ue, pae)
+    PRIMARY KEY (ue, etudiant)
 );
+
+-------------------Trigger
+
+----------UE
+--nbr_inscrit
+CREATE OR REPLACE FUNCTION projet.update_nbr_inscrit() RETURNS TRIGGER AS $$
+DECLARE
+    ue RECORD;
+BEGIN
+    FOR ue IN SELECT pu.ue FROM projet.pae_ue pu, projet.paes p
+    WHERE pu.etudiant = p.etudiant LOOP
+        UPDATE projet.unites_enseignement
+        SET nbr_credit=nbr_credit+1
+        WHERE code=ue;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_count_nbr_inscrit AFTER UPDATE OF validation ON projet.paes
+    FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_inscrit();
+
+----------PAES
+--nbr_credit_total
+CREATE OR REPLACE FUNCTION projet.update_nbr_credit_total() RETURNS TRIGGER AS $$
+DECLARE
+    ue RECORD;
+BEGIN
+    FOR ue IN SELECT ue.* FROM projet.pae_ue pu, projet.paes p, projet.unites_enseignement ue
+    WHERE pu.etudiant = p.etudiant AND pu.ue = ue.code LOOP
+        UPDATE projet.paes
+        SET nbr_credit_total = nbr_credit_total + ue.nbr_credit;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_count_nbr_credit_total AFTER INSERT ON projet.paes
+    FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_credit_total();
 
 
 -------------------Application centrale
 
 --Ajouter une UE
-
 --Ajouter un prerequis
 --Ajouter un etudiant
 --Ajouter une UE validee pour un etudiant
