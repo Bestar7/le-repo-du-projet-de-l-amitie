@@ -10,7 +10,7 @@ CREATE TABLE projet.etudiants (
     numero_etudiant SERIAL PRIMARY KEY,
     nom             varchar(100) NOT NULL CHECK (nom<>''),
     prenom          varchar(100) NOT NULL CHECK (prenom<>''),
-    email           varchar(100) NOT NULL CHECK (email SIMILAR TO '*@*.*') unique,
+    email           varchar(100) NOT NULL CHECK (email SIMILAR TO '%@%.%') unique,
     mdp             varchar(100) NOT NULL CHECK (mdp<>''),
     nbr_credit_valide int NOT NULL DEFAULT 0 CHECK (nbr_credit_valide>=0),
     numero_bloc     int NULL,
@@ -20,7 +20,7 @@ CREATE TABLE projet.etudiants (
 );
 
 CREATE TABLE projet.unites_enseignement (
-    code        char(8) PRIMARY KEY CHECK (code SIMILAR TO 'BINV[123]*'),
+    code        char(8) PRIMARY KEY CHECK (code SIMILAR TO 'BINV(1|2|3)___'),
     nom         varchar(100) NOT NULL CHECK (nom<>''),
     nbr_credit  int NOT NULL CHECK (nbr_credit>0),
     nbr_inscrit int NOT NULL DEFAULT 0 CHECK (nbr_inscrit>=0),
