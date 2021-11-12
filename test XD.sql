@@ -54,4 +54,100 @@ INSERT INTO projet.prerequis VALUES ('BINV3030','BINV2020');
 INSERT INTO projet.prerequis VALUES ('BINV2666','BINV1666');
 INSERT INTO projet.prerequis VALUES ('BINV3666','BINV2666');
 
+-- ACQUIS étudiants 1e
+INSERT INTO projet.acquis VALUES (4,'BINV1010');
+INSERT INTO projet.acquis VALUES (5,'BINV1670');
 
+-- ACQUIS étudiants 2e
+INSERT INTO projet.acquis VALUES (5,'BINV1010');
+INSERT INTO projet.acquis VALUES (5,'BINV1234');
+INSERT INTO projet.acquis VALUES (5,'BINV1666');
+INSERT INTO projet.acquis VALUES (5,'BINV1420');
+INSERT INTO projet.acquis VALUES (5,'BINV1560');
+INSERT INTO projet.acquis VALUES (5,'BINV1670');
+INSERT INTO projet.acquis VALUES (5,'BINV1700');
+
+INSERT INTO projet.acquis VALUES (6,'BINV1010');
+INSERT INTO projet.acquis VALUES (6,'BINV1234');
+INSERT INTO projet.acquis VALUES (6,'BINV1420');
+INSERT INTO projet.acquis VALUES (6,'BINV1560');
+INSERT INTO projet.acquis VALUES (6,'BINV1670');
+INSERT INTO projet.acquis VALUES (6,'BINV1700');
+
+INSERT INTO projet.acquis VALUES (7,'BINV1666');
+INSERT INTO projet.acquis VALUES (7,'BINV1420');
+INSERT INTO projet.acquis VALUES (7,'BINV1560');
+INSERT INTO projet.acquis VALUES (7,'BINV1670');
+INSERT INTO projet.acquis VALUES (7,'BINV1700');
+
+INSERT INTO projet.acquis VALUES (8,'BINV1420');
+INSERT INTO projet.acquis VALUES (8,'BINV1560');
+INSERT INTO projet.acquis VALUES (8,'BINV1670');
+INSERT INTO projet.acquis VALUES (8,'BINV1700');
+
+-- ACQUIS étudiants 3e
+INSERT INTO projet.acquis VALUES (9, 'BINV1010');
+INSERT INTO projet.acquis VALUES (9, 'BINV2020');
+INSERT INTO projet.acquis VALUES (9, 'BINV1234');
+INSERT INTO projet.acquis VALUES (9, 'BINV2234');
+INSERT INTO projet.acquis VALUES (9, 'BINV1666');
+INSERT INTO projet.acquis VALUES (9, 'BINV2666');
+INSERT INTO projet.acquis VALUES (9, 'BINV1420');
+INSERT INTO projet.acquis VALUES (9, 'BINV2420');
+INSERT INTO projet.acquis VALUES (9, 'BINV1560');
+INSERT INTO projet.acquis VALUES (9, 'BINV2400');
+INSERT INTO projet.acquis VALUES (9, 'BINV1670');
+INSERT INTO projet.acquis VALUES (9, 'BINV2450');
+INSERT INTO projet.acquis VALUES (9, 'BINV1700');
+INSERT INTO projet.acquis VALUES (9, 'BINV2725');
+
+INSERT INTO projet.acquis VALUES (10, 'BINV1010');
+INSERT INTO projet.acquis VALUES (10, 'BINV2020');
+INSERT INTO projet.acquis VALUES (10, 'BINV1234');
+INSERT INTO projet.acquis VALUES (10, 'BINV2234');
+INSERT INTO projet.acquis VALUES (10, 'BINV1420');
+INSERT INTO projet.acquis VALUES (10, 'BINV2420');
+INSERT INTO projet.acquis VALUES (10, 'BINV1560');
+INSERT INTO projet.acquis VALUES (10, 'BINV2400');
+INSERT INTO projet.acquis VALUES (10, 'BINV1670');
+INSERT INTO projet.acquis VALUES (10, 'BINV2450');
+INSERT INTO projet.acquis VALUES (10, 'BINV1700');
+INSERT INTO projet.acquis VALUES (10, 'BINV2725');
+
+INSERT INTO projet.acquis VALUES (11, 'BINV1666');
+INSERT INTO projet.acquis VALUES (11, 'BINV2666');
+INSERT INTO projet.acquis VALUES (11, 'BINV1420');
+INSERT INTO projet.acquis VALUES (11, 'BINV2420');
+INSERT INTO projet.acquis VALUES (11, 'BINV1560');
+INSERT INTO projet.acquis VALUES (11, 'BINV2400');
+INSERT INTO projet.acquis VALUES (11, 'BINV1670');
+INSERT INTO projet.acquis VALUES (11, 'BINV2450');
+INSERT INTO projet.acquis VALUES (11, 'BINV1700');
+INSERT INTO projet.acquis VALUES (11, 'BINV2725');
+
+INSERT INTO projet.acquis VALUES (12, 'BINV1420');
+INSERT INTO projet.acquis VALUES (12, 'BINV2420');
+INSERT INTO projet.acquis VALUES (12, 'BINV1560');
+INSERT INTO projet.acquis VALUES (12, 'BINV2400');
+INSERT INTO projet.acquis VALUES (12, 'BINV1670');
+INSERT INTO projet.acquis VALUES (12, 'BINV2450');
+INSERT INTO projet.acquis VALUES (12, 'BINV1700');
+INSERT INTO projet.acquis VALUES (12, 'BINV2725');
+
+-- PAES 1e
+INSERT INTO projet.paes VALUES (1, DEFAULT, true);
+INSERT INTO projet.paes VALUES (2, DEFAULT, true);
+INSERT INTO projet.paes VALUES (3, DEFAULT, true);
+INSERT INTO projet.paes VALUES (4, DEFAULT, false);
+
+-- PAES 2e
+INSERT INTO projet.paes VALUES (5, DEFAULT, false);
+INSERT INTO projet.paes VALUES (6, DEFAULT, false);
+INSERT INTO projet.paes VALUES (7, DEFAULT, false);
+INSERT INTO projet.paes VALUES (8, DEFAULT, false);
+
+-- PAES 3e
+INSERT INTO projet.paes VALUES (9, DEFAULT, false);
+INSERT INTO projet.paes VALUES (10, DEFAULT, false);
+INSERT INTO projet.paes VALUES (11, DEFAULT, false);
+INSERT INTO projet.paes VALUES (12, DEFAULT, false);
