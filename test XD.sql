@@ -27,22 +27,22 @@ INSERT INTO projet.unites_enseignement VALUES ('BINV2725', 'Crypto nite',       
 INSERT INTO projet.unites_enseignement VALUES ('BINV3710', 'cours de Jean',         9, DEFAULT, 3);
 
 -- ETUDIANT BLOC1
-INSERT INTO projet.etudiants VALUES (DEFAULT, 'jeanBINV3420', 'Mercéééé', 'jB@Jmail.com', '21', DEFAULT, 1);
-INSERT INTO projet.etudiants VALUES (DEFAULT, 'Mr Atchoum', 'Jean', 'jm@jm.com', 'jm', DEFAULT, 1);
-INSERT INTO projet.etudiants VALUES (DEFAULT, 'Mich', 'Jean', 'jean@mich.com', 'mdp', DEFAULT, 1);
-INSERT INTO projet.etudiants VALUES (DEFAULT, 'Malin', 'Sebastien', 'Sebastien@gmail.com', 'mdp', DEFAULT, 1);
+INSERT INTO projet.etudiants VALUES (DEFAULT, 'jeanBINV3420', 'Mercéééé', 'jB@Jmail.com', '21', DEFAULT, NULL);
+INSERT INTO projet.etudiants VALUES (DEFAULT, 'Mr Atchoum', 'Jean', 'jm@jm.com', 'jm', DEFAULT, NULL);
+INSERT INTO projet.etudiants VALUES (DEFAULT, 'Mich', 'Jean', 'jean@mich.com', 'mdp', DEFAULT, NULL);
+INSERT INTO projet.etudiants VALUES (DEFAULT, 'Malin', 'Sebastien', 'Sebastien@gmail.com', 'mdp', DEFAULT, NULL);
 
 -- ETUDIANT BLOC2
-INSERT INTO projet.etudiants VALUES (DEFAULT, 'Leblanc', 'Juste', 'juste.leblanc@gmail.com', 'mdp', DEFAULT, 2);
-INSERT INTO projet.etudiants VALUES (DEFAULT, 'Doux', 'Adrien', 'adrien.doux@gmail.com', 'mdp', DEFAULT, 2);
-INSERT INTO projet.etudiants VALUES (DEFAULT, 'Disant', 'François', 'françois.disant@gmail.com', 'mdp', DEFAULT, 2);
-INSERT INTO projet.etudiants VALUES (DEFAULT, 'Deuxtrois', 'Adrien', 'adrien.deuxtrois@gmail.com', 'mdp', DEFAULT, 2);
+INSERT INTO projet.etudiants VALUES (DEFAULT, 'Leblanc', 'Juste', 'juste.leblanc@gmail.com', 'mdp', DEFAULT, NULL);
+INSERT INTO projet.etudiants VALUES (DEFAULT, 'Doux', 'Adrien', 'adrien.doux@gmail.com', 'mdp', DEFAULT, NULL);
+INSERT INTO projet.etudiants VALUES (DEFAULT, 'Disant', 'François', 'françois.disant@gmail.com', 'mdp', DEFAULT, NULL);
+INSERT INTO projet.etudiants VALUES (DEFAULT, 'Deuxtrois', 'Adrien', 'adrien.deuxtrois@gmail.com', 'mdp', DEFAULT, NULL);
 
 -- ETUDIANT BLOC3
-INSERT INTO projet.etudiants VALUES (DEFAULT, 'Ban', 'Arthur', 'arthur.ban@gmail.com', 'mdp', DEFAULT, 3);
-INSERT INTO projet.etudiants VALUES (DEFAULT, 'Rophone', 'Mike', 'mike.rophone@gmail.com', 'mdp', DEFAULT, 3);
-INSERT INTO projet.etudiants VALUES (DEFAULT, 'Binet', 'Ro', 'ro.binet@gmail.com', 'mdp', DEFAULT, 3);
-INSERT INTO projet.etudiants VALUES (DEFAULT, 'Pellais Stewball', 'Isha', 'isha.pellais_stewball@gmail.com', 'mdp', DEFAULT, 3);
+INSERT INTO projet.etudiants VALUES (DEFAULT, 'Ban', 'Arthur', 'arthur.ban@gmail.com', 'mdp', DEFAULT, NULL);
+INSERT INTO projet.etudiants VALUES (DEFAULT, 'Rophone', 'Mike', 'mike.rophone@gmail.com', 'mdp', DEFAULT, NULL);
+INSERT INTO projet.etudiants VALUES (DEFAULT, 'Binet', 'Ro', 'ro.binet@gmail.com', 'mdp', DEFAULT, NULL);
+INSERT INTO projet.etudiants VALUES (DEFAULT, 'Pellais Stewball', 'Isha', 'isha.pellais_stewball@gmail.com', 'mdp', DEFAULT, NULL);
 
 -- PREREQUIS
 INSERT INTO projet.prerequis VALUES ('BINV2234','BINV1234');
@@ -55,8 +55,8 @@ INSERT INTO projet.prerequis VALUES ('BINV2666','BINV1666');
 INSERT INTO projet.prerequis VALUES ('BINV3666','BINV2666');
 
 -- ACQUIS étudiants 1e
-INSERT INTO projet.acquis VALUES (4,'BINV1010');
-INSERT INTO projet.acquis VALUES (5,'BINV1670');
+INSERT INTO projet.acquis VALUES (3,'BINV1010');
+INSERT INTO projet.acquis VALUES (4,'BINV1670');
 
 -- ACQUIS étudiants 2e
 INSERT INTO projet.acquis VALUES (5,'BINV1010');
@@ -108,11 +108,13 @@ INSERT INTO projet.acquis VALUES (10, 'BINV2234');
 INSERT INTO projet.acquis VALUES (10, 'BINV1420');
 INSERT INTO projet.acquis VALUES (10, 'BINV2420');
 INSERT INTO projet.acquis VALUES (10, 'BINV1560');
+INSERT INTO projet.acquis VALUES (10, 'BINV1666');
 INSERT INTO projet.acquis VALUES (10, 'BINV2400');
 INSERT INTO projet.acquis VALUES (10, 'BINV1670');
 INSERT INTO projet.acquis VALUES (10, 'BINV2450');
 INSERT INTO projet.acquis VALUES (10, 'BINV1700');
 INSERT INTO projet.acquis VALUES (10, 'BINV2725');
+
 
 INSERT INTO projet.acquis VALUES (11, 'BINV1666');
 INSERT INTO projet.acquis VALUES (11, 'BINV2666');
@@ -124,15 +126,25 @@ INSERT INTO projet.acquis VALUES (11, 'BINV1670');
 INSERT INTO projet.acquis VALUES (11, 'BINV2450');
 INSERT INTO projet.acquis VALUES (11, 'BINV1700');
 INSERT INTO projet.acquis VALUES (11, 'BINV2725');
+INSERT INTO projet.acquis VALUES (11, 'BINV3710');
+INSERT INTO projet.acquis VALUES (11, 'BINV3400');
+INSERT INTO projet.acquis VALUES (11, 'BINV3333');
+INSERT INTO projet.acquis VALUES (11, 'BINV3420');
 
+INSERT INTO projet.acquis VALUES (12, 'BINV1234');
+INSERT INTO projet.acquis VALUES (12, 'BINV2234');
 INSERT INTO projet.acquis VALUES (12, 'BINV1420');
 INSERT INTO projet.acquis VALUES (12, 'BINV2420');
+INSERT INTO projet.acquis VALUES (12, 'BINV3420');
 INSERT INTO projet.acquis VALUES (12, 'BINV1560');
 INSERT INTO projet.acquis VALUES (12, 'BINV2400');
+INSERT INTO projet.acquis VALUES (12, 'BINV3333');
 INSERT INTO projet.acquis VALUES (12, 'BINV1670');
 INSERT INTO projet.acquis VALUES (12, 'BINV2450');
+INSERT INTO projet.acquis VALUES (12, 'BINV3400');
 INSERT INTO projet.acquis VALUES (12, 'BINV1700');
 INSERT INTO projet.acquis VALUES (12, 'BINV2725');
+INSERT INTO projet.acquis VALUES (12, 'BINV3710');
 
 -- PAES 1e
 INSERT INTO projet.paes VALUES (1, DEFAULT, true);
