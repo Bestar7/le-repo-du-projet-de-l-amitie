@@ -94,3 +94,23 @@ CREATE TABLE projet.pae_ue (
 --Afficher les UE auxquelles un etudiant peut s'inscrire
 --Afficher son PAE
 --Reinitialiser son PAE
+
+CREATE OR REPLACE FUNCTION projet.update_nbr_credit_valide() RETURNS TRIGGER AS $$
+DECLARE
+BEGIN
+    --ajoute les credit si acqui
+    UPDATE projet.etudiants
+    SET nbr_credit_valide = nbr_credit_valide +
+                            (SELECT ue.nbr_credit
+                            FROM projet.unites_enseignement ue
+                            WHERE ue.code = NEW.ue)
+    WHERE etudiants.numero_etudiant = NEW.etudiant;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+--trigger pour  future virements
+CREATE TRIGGER trigger_nbr_credit_valide
+AFTER INSERT ON projet.acquis
+FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_credit_valide();
