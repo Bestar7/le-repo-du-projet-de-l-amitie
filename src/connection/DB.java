@@ -1,3 +1,5 @@
+package connection;
+
 import java.sql.*;
 
 public class DB {
@@ -50,9 +52,9 @@ public class DB {
     }
 
     /* TODO INUTILE ???
-    public static DB getInstance() {
+    public static connection.DB getInstance() {
         if (instance == null)
-            instance = new DB();
+            instance = new connection.DB();
         return instance;
     }
 
