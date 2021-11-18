@@ -64,20 +64,126 @@ CREATE TABLE projet.prerequis (
 
 CREATE TABLE projet.pae_ue (
     ue  char(8) NOT NULL,
-    pae int NOT NULL,
+    etudiant int NOT NULL,
 
     CONSTRAINT ue_fkey FOREIGN KEY(ue)
         REFERENCES projet.unites_enseignement(code),
-    CONSTRAINT pae_fkey FOREIGN KEY(pae)
+    CONSTRAINT pae_fkey FOREIGN KEY(etudiant)
         REFERENCES projet.paes(etudiant),
-    PRIMARY KEY (ue, pae)
+    PRIMARY KEY (ue, etudiant)
 );
 
+-------------------Trigger
+
+----------UE
+--nbr_inscrit
+CREATE OR REPLACE FUNCTION projet.update_nbr_inscrit() RETURNS TRIGGER AS $$
+DECLARE
+    ue RECORD;
+BEGIN
+    FOR ue IN SELECT pu.ue FROM projet.pae_ue pu, projet.paes p
+    WHERE pu.etudiant = p.etudiant LOOP
+        UPDATE projet.unites_enseignement
+        SET nbr_credit=nbr_credit+1
+        WHERE code=ue;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_count_nbr_inscrit AFTER UPDATE OF validation ON projet.paes
+    FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_inscrit();
+
+----------PAES
+--nbr_credit_total
+CREATE OR REPLACE FUNCTION projet.update_nbr_credit_total() RETURNS TRIGGER AS $$
+DECLARE
+    ue RECORD;
+BEGIN
+    FOR ue IN SELECT ue.* FROM projet.pae_ue pu, projet.paes p, projet.unites_enseignement ue
+    WHERE pu.etudiant = p.etudiant AND pu.ue = ue.code LOOP
+        UPDATE projet.paes
+        SET nbr_credit_total = nbr_credit_total + ue.nbr_credit;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_count_nbr_credit_total AFTER INSERT ON projet.paes
+    FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_credit_total();
+
+--validation
+CREATE OR REPLACE FUNCTION projet.update_validation(etudiant_num INTEGER) RETURNS VOID AS $$
+DECLARE
+    ue_valide RECORD;
+    credit_total_valide int;
+    credit_total_pae int;
+    bloc int;
+BEGIN
+    --pas deja valide
+    IF(SELECT p.validation FROM projet.paes p WHERE p.etudiant = etudiant_num) THEN
+        RAISE 'PAE deja valide';
+    end if;
+
+
+    --ues valide par eleve
+    SELECT a.* FROM projet.acquis a, projet.paes p
+    WHERE p.etudiant = a.etudiant AND etudiant_num = p.etudiant
+    INTO ue_valide;
+
+    --nombre credit deja valide
+    SELECT e.nbr_credit_valide FROM projet.etudiants e
+    WHERE etudiant_num = e.numero_etudiant
+    INTO credit_total_valide;
+
+    --nombre credit dans le pae
+    SELECT p.nbr_credit_total FROM projet.paes p
+    WHERE etudiant_num = p.etudiant
+    INTO credit_total_pae;
+
+    --verification du nombre de credit total du pae
+    IF(credit_total_valide <= 30) THEN
+        IF(credit_total_pae > 60) THEN
+            RAISE 'Vous ne pouvez pas avoir plus de 60 credits quand vous avez valide moins de 30 credit';
+        END IF;
+    END IF;
+    IF(credit_total_valide + credit_total_pae < 180) THEN
+        IF(credit_total_valide < 45 AND credit_total_pae > 60) THEN
+            RAISE 'Vous ne pouvez pas avoir plus de 60 credit a votre pae quand vous avez valide moins de 45 credit';
+        END IF;
+        IF(credit_total_pae > 75 OR credit_total_pae < 55) THEN
+            RAISE 'Vous devez avoir entre 55 et 74 credit a votre pae';
+        END IF;
+    END IF;
+    IF(credit_total_pae + credit_total_valide > 180) THEN
+        RAISE 'Vous ne pouvez pas avoir plus de 180 a pouvoir valide au total';
+    END IF;
+
+    --determination du bloc
+    IF (credit_total_valide <= 30)THEN
+        bloc=1;
+    ELSE
+        IF(credit_total_valide + credit_total_pae == 180)THEN
+            bloc=3;
+        ELSE
+            bloc=2;
+        END IF;
+    END IF;
+
+    --affectation du bloc a l'etudiant
+    UPDATE projet.etudiants
+    SET numero_bloc = bloc
+    WHERE numero_etudiant = etudiant_num;
+
+    --validation du pae
+    UPDATE projet.paes
+    SET validation = TRUE
+    WHERE etudiant = etudiant_num;
+
+END;
+$$ LANGUAGE plpgsql;
 
 -------------------Application centrale
 
 --Ajouter une UE
-
 --Ajouter un prerequis
 --Ajouter un etudiant
 --Ajouter une UE validee pour un etudiant
