@@ -3,7 +3,7 @@ package connection;
 import java.sql.*;
 
 public class DB {
-    private static DB instance;
+
     private static Connection conn;
 
     static {
@@ -30,28 +30,25 @@ public class DB {
         }
     }
 
-    public static void update(String update) {
-        //System.out.println(update);
-        try (Statement statement = conn.createStatement()) {
-            statement.executeUpdate(update);
+    public static void update(String update) throws StatementAndSQLException{
+        try (PreparedStatement statement = conn.prepareStatement(update)) {
+            statement.executeUpdate();
         } catch (SQLException e) {
-            System.out.println(update);
-            e.printStackTrace();
+            throw new StatementAndSQLException(update);
         }
     }
 
-    public static ResultSet query(String query) {
-        try (Statement statement = conn.createStatement()){
-            ResultSet resultSet = statement.executeQuery(query);
-            return resultSet;
+    public static ResultSet query(String query) throws StatementAndSQLException{
+        try (PreparedStatement statement = conn.prepareStatement(query)) {
+            return statement.executeQuery();
         } catch (SQLException se) {
-            System.out.println(query);
-            se.printStackTrace();
-            return null;
+            throw new StatementAndSQLException(query);
         }
     }
 
     /* TODO INUTILE ???
+    private static DB instance;
+
     public static connection.DB getInstance() {
         if (instance == null)
             instance = new connection.DB();
