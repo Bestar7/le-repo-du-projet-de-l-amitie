@@ -181,26 +181,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--------------------Application centrale
-
---Ajouter une UE
---Ajouter un prerequis
---Ajouter un etudiant
---Ajouter une UE validee pour un etudiant
---Afficher tout les etudiant d'un bloc
---Afficher le nombre de credit du PAE pour un etudiant
---Afficher tout les etudiant dont le PEA n'est pas valider
---Afficher toutes les UE d'un bloc
-
--------------------Application etudiant
-
---Ajouter une UE a son PAE
---Enlever une UE a son PAE
---Valider son PAE
---Afficher les UE auxquelles un etudiant peut s'inscrire
---Afficher son PAE
---Reinitialiser son PAE
-
+----------ACQUIS
+--nbr_credit_valide
 CREATE OR REPLACE FUNCTION projet.update_nbr_credit_valide() RETURNS TRIGGER AS $$
 DECLARE
 BEGIN
@@ -216,7 +198,89 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
---trigger pour  future virements
 CREATE TRIGGER trigger_nbr_credit_valide
 AFTER INSERT ON projet.acquis
 FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_credit_valide();
+
+
+
+
+
+-------------------Application centrale
+
+--Ajouter une UE
+    INSERT INTO projet.unites_enseignement VALUES (?,?,?,?,?);
+
+--Ajouter un prerequis
+    INSERT INTO projet.prerequis VALUES (?,?);
+
+--Ajouter un etudiant
+    INSERT INTO projet.etudiants VALUES (DEFAULT,?,?,?,?,DEFAULT,NULL);
+
+--Ajouter une UE validee pour un etudiant
+    INSERT INTO projet.acquis VALUES (?,?);
+
+--Afficher tout les etudiant d'un bloc
+    --java
+    SELECT e.numero_etudiant, e.nom, e.prenom, e.email
+    FROM projet.etudiants e
+    WHERE e.numero_bloc IS NOT NULL AND e.numero_etudiant = ?;
+
+--Afficher le nombre de credit du PAE pour un etudiant
+    --java
+    SELECT c.nbr_credit_total FROM projet.credit_PAE_etudiant c WHERE "Numero Etudiant" = ?;
+    --SQL
+CREATE VIEW projet.credit_PAE_etudiant AS
+    SELECT p.nbr_credit_total, e.numero_etudiant AS "Numero Etudiant"
+    FROM projet.paes p, projet.etudiants e
+    WHERE p.etudiant = e.numero_etudiant;
+
+--Afficher tout les etudiant dont le PEA n'est pas valider
+    --java
+    SELECT e.numero_etudiant, e.nom, e.prenom, e.email, e.nbr_credit_valide
+    FROM projet.etudiants e, projet.paes p
+    WHERE e.numero_bloc IS NULL;
+
+--Afficher toutes les UE d'un bloc
+    --java
+    SELECT ue.code, ue.nom, ue.nbr_credit, ue.nbr_inscrit
+    FROM projet.unites_enseignement ue
+    WHERE ue.numero_bloc = ?;
+
+
+
+
+
+-------------------Application etudiant
+
+--Ajouter une UE a son PAE
+
+--Enlever une UE a son PAE
+--Valider son PAE
+--Afficher les UE auxquelles un etudiant peut s'inscrire
+--TODO a verifier pas sur que ca marche VRAIMENT PAS
+CREATE VIEW projet.UE_disponible AS
+    SELECT eu.code, eu.nom, eu.nbr_credit, eu.nbr_inscrit, eu.numero_bloc, e.numero_etudiant
+    FROM projet.unites_enseignement eu, projet.etudiants e
+    WHERE eu.code NOT IN(
+                SELECT a.ue
+                FROM projet.acquis a
+                WHERE e.numero_etudiant = a.etudiant
+            ) AND
+          eu.code NOT IN(
+                SELECT pu.ue
+                FROM projet.pae_ue pu
+                WHERE e.numero_etudiant = pu.etudiant
+            ) AND
+          eu.code NOT IN(
+              SELECT pre.ue_qui_requiert
+              FROM projet.prerequis pre
+              WHERE pre.ue_requise NOT IN(
+                  SELECT a.ue
+                  FROM projet.acquis a
+                  WHERE e.numero_etudiant = a.etudiant
+                  )
+            )
+
+--Afficher son PAE
+--Reinitialiser son PAE
