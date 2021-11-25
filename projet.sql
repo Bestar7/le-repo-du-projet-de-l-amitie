@@ -1,10 +1,9 @@
 DROP SCHEMA IF EXISTS projet CASCADE;
 CREATE SCHEMA projet;
 
-
+CREATE TYPE numero_bloc AS ENUM (1,2,3);
 CREATE TABLE projet.blocs (
-    numero_bloc SERIAL PRIMARY KEY,
-    libelle     char(5) NOT NULL CHECK (libelle SIMILAR TO 'bloc[123]') unique
+    numero_bloc numero_bloc PRIMARY KEY
 );
 
 CREATE TABLE projet.etudiants (
@@ -21,7 +20,8 @@ CREATE TABLE projet.etudiants (
 );
 
 CREATE TABLE projet.unites_enseignement (
-    code        char(8) PRIMARY KEY CHECK (code SIMILAR TO 'BINV(1|2|3)___'),
+    id_ue       SERIAL PRIMARY KEY,
+    code        varchar(20) CHECK (code<>''),
     nom         varchar(100) NOT NULL CHECK (nom<>''),
     nbr_credit  int NOT NULL CHECK (nbr_credit>0),
     nbr_inscrit int NOT NULL DEFAULT 0 CHECK (nbr_inscrit>=0),
@@ -34,7 +34,7 @@ CREATE TABLE projet.unites_enseignement (
 CREATE TABLE projet.paes (
     etudiant            int PRIMARY KEY,
     nbr_credit_total    int NOT NULL DEFAULT 0 CHECK (nbr_credit_total<=74 AND nbr_credit_total>=0),
-    validation          bool NOT NULL DEFAULT false,
+    est_valide          bool NOT NULL DEFAULT false,
 
     CONSTRAINT pae_etudiant_fkey FOREIGN KEY(etudiant)
         REFERENCES projet.etudiants(numero_etudiant)
@@ -47,7 +47,7 @@ CREATE TABLE projet.acquis (
     CONSTRAINT etudiant_acquis_fkey FOREIGN KEY(etudiant)
         REFERENCES projet.etudiants(numero_etudiant),
     CONSTRAINT ue_acquis_fkey FOREIGN KEY(ue)
-        REFERENCES projet.unites_enseignement(code),
+        REFERENCES projet.unites_enseignement(id_ue),
     PRIMARY KEY (etudiant, ue)
 );
 
@@ -56,9 +56,9 @@ CREATE TABLE projet.prerequis (
     ue_requise        char(8) NOT NULL CHECK (ue_qui_requiert<>ue_requise),
 
     CONSTRAINT requiert_fkey FOREIGN KEY(ue_qui_requiert)
-        REFERENCES projet.unites_enseignement(code),
+        REFERENCES projet.unites_enseignement(id_ue),
     CONSTRAINT est_requis_fkey FOREIGN KEY(ue_requise)
-        REFERENCES projet.unites_enseignement(code),
+        REFERENCES projet.unites_enseignement(id_ue),
     PRIMARY KEY (ue_qui_requiert, ue_requise)
 );
 
@@ -67,7 +67,7 @@ CREATE TABLE projet.pae_ue (
     etudiant int NOT NULL,
 
     CONSTRAINT ue_fkey FOREIGN KEY(ue)
-        REFERENCES projet.unites_enseignement(code),
+        REFERENCES projet.unites_enseignement(id_ue),
     CONSTRAINT pae_fkey FOREIGN KEY(etudiant)
         REFERENCES projet.paes(etudiant),
     PRIMARY KEY (ue, etudiant)
@@ -85,12 +85,12 @@ BEGIN
     WHERE pu.etudiant = p.etudiant LOOP
         UPDATE projet.unites_enseignement
         SET nbr_credit=nbr_credit+1
-        WHERE code=ue;
+        WHERE id_ue=ue;
     END LOOP;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trigger_count_nbr_inscrit AFTER UPDATE OF validation ON projet.paes
+CREATE TRIGGER trigger_count_nbr_inscrit AFTER UPDATE OF est_valide ON projet.paes
     FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_inscrit();
 
 ----------PAES
@@ -119,7 +119,7 @@ DECLARE
     bloc int;
 BEGIN
     --pas deja valide
-    IF(SELECT p.validation FROM projet.paes p WHERE p.etudiant = etudiant_num) THEN
+    IF(SELECT p.est_valide FROM projet.paes p WHERE p.etudiant = etudiant_num) THEN
         RAISE 'PAE deja valide';
     end if;
 
@@ -175,7 +175,7 @@ BEGIN
 
     --validation du pae
     UPDATE projet.paes
-    SET validation = TRUE
+    SET est_valide = TRUE
     WHERE etudiant = etudiant_num;
 
 END;
