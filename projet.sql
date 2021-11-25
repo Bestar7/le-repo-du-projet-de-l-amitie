@@ -73,6 +73,13 @@ CREATE TABLE projet.pae_ue (
     PRIMARY KEY (ue, etudiant)
 );
 
+
+
+
+
+
+
+
 -------------------Trigger
 
 ----------UE
@@ -111,9 +118,8 @@ CREATE TRIGGER trigger_count_nbr_credit_total AFTER INSERT ON projet.paes
     FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_credit_total();
 
 --validation
-CREATE OR REPLACE FUNCTION projet.update_validation(etudiant_num INTEGER) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION projet.update_validation(etudiant_num INTEGER) RETURNS TRIGGER AS $$
 DECLARE
-    ue_valide RECORD;
     credit_total_valide int;
     credit_total_pae int;
     bloc int;
@@ -122,12 +128,6 @@ BEGIN
     IF(SELECT p.est_valide FROM projet.paes p WHERE p.etudiant = etudiant_num) THEN
         RAISE 'PAE deja valide';
     end if;
-
-
-    --ues valide par eleve
-    SELECT a.* FROM projet.acquis a, projet.paes p
-    WHERE p.etudiant = a.etudiant AND etudiant_num = p.etudiant
-    INTO ue_valide;
 
     --nombre credit deja valide
     SELECT e.nbr_credit_valide FROM projet.etudiants e
@@ -139,29 +139,26 @@ BEGIN
     WHERE etudiant_num = p.etudiant
     INTO credit_total_pae;
 
-    --verification du nombre de credit total du pae
-    IF(credit_total_valide <= 30) THEN
-        IF(credit_total_pae > 60) THEN
-            RAISE 'Vous ne pouvez pas avoir plus de 60 credits quand vous avez valide moins de 30 credit';
-        END IF;
-    END IF;
-    IF(credit_total_valide + credit_total_pae < 180) THEN
-        IF(credit_total_valide < 45 AND credit_total_pae > 60) THEN
-            RAISE 'Vous ne pouvez pas avoir plus de 60 credit a votre pae quand vous avez valide moins de 45 credit';
-        END IF;
-        IF(credit_total_pae > 75 OR credit_total_pae < 55) THEN
-            RAISE 'Vous devez avoir entre 55 et 74 credit a votre pae';
-        END IF;
-    END IF;
-    IF(credit_total_pae + credit_total_valide > 180) THEN
-        RAISE 'Vous ne pouvez pas avoir plus de 180 a pouvoir valide au total';
-    END IF;
+    --verification des conditions pour le nombre de credit total du pae
+    IF (credit_total_valide > 45) THEN
+        IF (credit_total_pae > 60) THEN
+            RAISE 'Votre PAE ne peut pas dépasser 60 credits';
+        end if;
+
+    ELSIF (credit_total_valide + credit_total_valide >= 180) THEN
+        IF (credit_total_pae > 74) THEN
+            RAISE 'Votre PAE ne peut pas avoir plus de 74 credits';
+        end if;
+    end if;
+    IF (credit_total_pae < 55 OR credit_total_pae > 74) THEN
+        RAISE 'Votre PAE doit contenir entre 55 et 74 credits';
+    end if;
 
     --determination du bloc
-    IF (credit_total_valide <= 30)THEN
+    IF (credit_total_valide <= 45)THEN
         bloc=1;
     ELSE
-        IF(credit_total_valide + credit_total_pae == 180)THEN
+        IF(credit_total_valide + credit_total_pae >= 180)THEN
             bloc=3;
         ELSE
             bloc=2;
@@ -180,6 +177,32 @@ BEGIN
 
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_valider_pae BEFORE UPDATE OF est_valide ON projet.paes
+    FOR EACH ROW EXECUTE PROCEDURE projet.update_validation(?);
+
+
+
+--------------ETUDIANT
+
+--nbr_credit_valide
+CREATE OR REPLACE FUNCTION projet.update_nbr_credit_valide() RETURNS TRIGGER AS $$
+BEGIN
+    --ajoute les credit si acqui
+    UPDATE projet.etudiants
+    SET nbr_credit_valide = nbr_credit_valide +
+                            (SELECT ue.nbr_credit
+                            FROM projet.unites_enseignement ue
+                            WHERE ue.code = NEW.ue)
+    WHERE etudiants.numero_etudiant = NEW.etudiant;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_nbr_credit_valide
+AFTER UPDATE ON projet.acquis
+FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_credit_valide();
 
 -------------------Application centrale
 
@@ -200,23 +223,3 @@ $$ LANGUAGE plpgsql;
 --Afficher les UE auxquelles un etudiant peut s'inscrire
 --Afficher son PAE
 --Reinitialiser son PAE
-
-CREATE OR REPLACE FUNCTION projet.update_nbr_credit_valide() RETURNS TRIGGER AS $$
-DECLARE
-BEGIN
-    --ajoute les credit si acqui
-    UPDATE projet.etudiants
-    SET nbr_credit_valide = nbr_credit_valide +
-                            (SELECT ue.nbr_credit
-                            FROM projet.unites_enseignement ue
-                            WHERE ue.code = NEW.ue)
-    WHERE etudiants.numero_etudiant = NEW.etudiant;
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
---trigger pour  future virements
-CREATE TRIGGER trigger_nbr_credit_valide
-AFTER INSERT ON projet.acquis
-FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_credit_valide();
