@@ -104,7 +104,7 @@ public class ChoiceHandler {
         }
     }
 
-    public static void visuNbrCreditPae() {
+    public static void visuNbrCreditPae() { // TODO View
         try {
             ResultSet rs = DB.select("e.numero_etudiant, e.nom, e.prenom, e.email",
                     "etudiants e", "WHERE numero_bloc ", "IS NULL", "");
