@@ -30,16 +30,19 @@ public class DB {
         }
     }
 
-    public static void update(String update) throws StatementAndSQLException{
-        try (PreparedStatement statement = conn.prepareStatement(update)) {
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new StatementAndSQLException(update);
-        }
+    public static ResultSet select(String columns, String from) throws StatementAndSQLException{
+        return select(columns, from, "1=1");
     }
 
-    public static ResultSet query(String query) throws StatementAndSQLException{
+    public static ResultSet select(String columns, String from, String conditions) throws StatementAndSQLException{
+        String projet = "projet"; // IntelliJ n'aime pas avoir projet.? dans un string donc Improvise. Adapt. Overcome
+        String query =  "SELECT ? \n" +
+                        "FROM "+projet+".? \n" +
+                        "WHERE ? ;";
         try (PreparedStatement statement = conn.prepareStatement(query)) {
+            statement.setString(1, columns);
+            statement.setString(2, from);
+            statement.setString(3, conditions);
             return statement.executeQuery();
         } catch (SQLException se) {
             throw new StatementAndSQLException(query);
