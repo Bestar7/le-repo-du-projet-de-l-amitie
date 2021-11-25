@@ -232,19 +232,64 @@ CREATE OR REPLACE FUNCTION projet.ajouter_prerequis(int, int) RETURNS VOID AS $$
 $$ LANGUAGE plpgsql;
 
 --Ajouter un etudiant
+CREATE OR REPLACE FUNCTION projet.ajouter_etudiant(varchar,varchar,varchar,varchar) RETURNS VOID AS $$
+    DECLARE
+        et_nom ALIAS FOR $1;
+        et_prenom ALIAS FOR $2;
+        et_email ALIAS FOR $3;
+        et_mdp ALIAS FOR $4;
+    BEGIN
+        INSERT INTO projet.etudiants VALUES
+            (DEFAULT, et_nom, et_prenom, et_email, et_mdp, 0, NULL);
+    END;
+$$LANGUAGE plpgsql;
 
 --Ajouter une UE validee pour un etudiant
+CREATE OR REPLACE FUNCTION projet.ajouter_acquis(int,int) RETURNS VOID AS $$
+    DECLARE
+        id_etudiant ALIAS FOR $1;
+        id_ue ALIAS FOR $2;
+    BEGIN
+        INSERT INTO projet.acquis VALUES
+            (id_etudiant, id_ue);
+    END;
+$$LANGUAGE plpgsql;
+
 --Afficher tout les etudiant d'un bloc
-CREATE VIEW projet.afficher_tout_etudiant AS
-    SELECT e.nom, e.prenom, e.numero_bloc
+CREATE VIEW projet.afficher_etudiant_bloc AS
+    SELECT e.nom, e.prenom, e.nbr_credit_valide
     FROM projet.etudiants e
     WHERE e.numero_bloc IS NOT NULL AND e.numero_bloc = 'Numero Bloc'
-    ORDER BY e.nbr_credit_valide;
+    ORDER BY e.nom;
+
+SELECT * FROM projet.afficher_etudiant_bloc WHERE 'Numero Bloc' = ?;
+
+--Afficher le nombre de credit du PAE pour un etudiant
+CREATE VIEW projet.afficher_tout_etudiant AS
+    SELECT e.nom, e.prenom, e.numero_bloc, p.nbr_credit_total
+    FROM projet.etudiants e, projet.paes p
+    WHERE e.numero_etudiant = p.etudiant
+    ORDER BY p.nbr_credit_total;
 
 SELECT * FROM projet.afficher_tout_etudiant;
---Afficher le nombre de credit du PAE pour un etudiant
+
 --Afficher tout les etudiant dont le PEA n'est pas valider
+CREATE VIEW projet.afficher_etudiant_pae_non_valide AS
+    SELECT e.nom, e.prenom, e.nbr_credit_valide
+    FROM projet.etudiants e, projet.paes p
+    WHERE e.numero_etudiant = p.etudiant AND
+          p.est_valide = FALSE;
+
+SELECT * FROM projet.afficher_etudiant_pae_non_valide;
+
 --Afficher toutes les UE d'un bloc
+CREATE VIEW projet.afficher_ue_bloc AS
+    SELECT ue.code, ue.nom, ue.nbr_inscrit
+    FROM projet.unites_enseignement ue
+    WHERE ue.numero_bloc = 'Numero bloc'
+    ORDER BY ue.nbr_inscrit;
+
+SELECT * FROM projet.afficher_ue_bloc WHERE 'Numero bloc' = ?;
 
 -------------------Application etudiant
 
