@@ -21,7 +21,7 @@ CREATE TABLE projet.etudiants (
 
 CREATE TABLE projet.unites_enseignement (
     id_ue       SERIAL PRIMARY KEY,
-    code        varchar(20) CHECK (code<>''),
+    code        varchar(20) NOT NULL UNIQUE CHECK (code<>''),
     nom         varchar(100) NOT NULL CHECK (nom<>''),
     nbr_credit  int NOT NULL CHECK (nbr_credit>0),
     nbr_inscrit int NOT NULL DEFAULT 0 CHECK (nbr_inscrit>=0),
@@ -42,7 +42,7 @@ CREATE TABLE projet.paes (
 
 CREATE TABLE projet.acquis (
     etudiant    int NOT NULL,
-    ue          char(8) NOT NULL,
+    ue          int NOT NULL,
 
     CONSTRAINT etudiant_acquis_fkey FOREIGN KEY(etudiant)
         REFERENCES projet.etudiants(numero_etudiant),
@@ -52,8 +52,8 @@ CREATE TABLE projet.acquis (
 );
 
 CREATE TABLE projet.prerequis (
-    ue_qui_requiert   char(8) NOT NULL CHECK (ue_qui_requiert<>ue_requise),
-    ue_requise        char(8) NOT NULL CHECK (ue_qui_requiert<>ue_requise),
+    ue_qui_requiert   int NOT NULL CHECK (ue_qui_requiert<>ue_requise),
+    ue_requise        int NOT NULL CHECK (ue_qui_requiert<>ue_requise),
 
     CONSTRAINT requiert_fkey FOREIGN KEY(ue_qui_requiert)
         REFERENCES projet.unites_enseignement(id_ue),
@@ -63,7 +63,7 @@ CREATE TABLE projet.prerequis (
 );
 
 CREATE TABLE projet.pae_ue (
-    ue  char(8) NOT NULL,
+    ue  int NOT NULL,
     etudiant int NOT NULL,
 
     CONSTRAINT ue_fkey FOREIGN KEY(ue)
@@ -207,10 +207,41 @@ FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_credit_valide();
 -------------------Application centrale
 
 --Ajouter une UE
+CREATE OR REPLACE FUNCTION projet.ajouter_ue(varchar,varchar,int,int) RETURNS VOID AS $$
+    DECLARE
+        ue_code ALIAS FOR $1;
+        ue_nom ALIAS FOR $2;
+        ue_nbr_credit ALIAS FOR $3;
+        num_bloc ALIAS FOR $4;
+
+    BEGIN
+        INSERT INTO projet.unites_enseignement VALUES
+         (DEFAULT, ue_code, ue_nom, ue_nbr_credit, 0, num_bloc);
+    END;
+$$ LANGUAGE plpgsql;
+
 --Ajouter un prerequis
+CREATE OR REPLACE FUNCTION projet.ajouter_prerequis(int, int) RETURNS VOID AS $$
+    DECLARE
+        prerequise ALIAS FOR $1;
+        requise ALIAS FOR $2;
+    BEGIN
+        INSERT INTO projet.prerequis VALUES
+         (prerequise, requise);
+    END;
+$$ LANGUAGE plpgsql;
+
 --Ajouter un etudiant
+
 --Ajouter une UE validee pour un etudiant
 --Afficher tout les etudiant d'un bloc
+CREATE VIEW projet.afficher_tout_etudiant AS
+    SELECT e.nom, e.prenom, e.numero_bloc
+    FROM projet.etudiants e
+    WHERE e.numero_bloc IS NOT NULL AND e.numero_bloc = 'Numero Bloc'
+    ORDER BY e.nbr_credit_valide;
+
+SELECT * FROM projet.afficher_tout_etudiant;
 --Afficher le nombre de credit du PAE pour un etudiant
 --Afficher tout les etudiant dont le PEA n'est pas valider
 --Afficher toutes les UE d'un bloc
