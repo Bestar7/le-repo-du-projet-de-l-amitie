@@ -1,7 +1,7 @@
 package appCentral;
 
 import connection.StatementAndSQLException;
-import utils.UtilsDb;
+import connection.DB;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,7 +26,9 @@ public class ChoiceHandler {
         int numBloc = scanner.nextInt();
 
         try{
-            UtilsDb.insert("unites_enseignement", String.format(" '%s','%s',%d,DEFAULT,%d", code, nom, nbrCredit, numBloc));
+            // TODO
+            DB.select("","function ajouterUE");
+            //UtilsDb.insert("unites_enseignement", String.format(" '%s','%s',%d,DEFAULT,%d", code, nom, nbrCredit, numBloc));
         } catch (StatementAndSQLException e){
             e.printStackTrace();
         }
@@ -39,7 +41,9 @@ public class ChoiceHandler {
         String ueRequise = scanner.nextLine();
 
         try{
-            UtilsDb.insert("prerequis", String.format(" '%s','%s' ", ueQuiRequiert, ueRequise));
+            // TODO
+            DB.select("","function ajouterPrerequis");
+            //UtilsDb.insert("prerequis", String.format(" '%s','%s' ", ueQuiRequiert, ueRequise));
         } catch (StatementAndSQLException e){
             e.printStackTrace();
         }
@@ -58,7 +62,9 @@ public class ChoiceHandler {
         String mdp = scanner.nextLine();
 
         try{
-            UtilsDb.insert("etudiants", String.format(" '%s','%s','%s','%s' ", nom, prenom,email,mdp));
+            // TODO
+            DB.select("","function ajouterEtudiant");
+            //UtilsDb.insert("etudiants", String.format(" '%s','%s','%s','%s' ", nom, prenom,email,mdp));
         } catch (StatementAndSQLException e){
             e.printStackTrace();
         }
@@ -66,13 +72,14 @@ public class ChoiceHandler {
 
     // TODO crée une view pour trouver le num d'étudiant avec son email
     public static void encoderUeValide() {
-        System.out.println("eamil de l'étudiant : ");
+        System.out.println("email de l'étudiant : ");
         String email = scanner.nextLine();
         System.out.println("code de l'UE acquise par l'étudiant  : ");
         String code = scanner.nextLine();
 
         try{
-            UtilsDb.insert("acquis", String.format(" '______________ ", email));
+            DB.select("","function validerUE");
+            //UtilsDb.insert("acquis", String.format(" '______________ ", email));
         } catch (StatementAndSQLException e){
             e.printStackTrace();
         }
@@ -80,11 +87,11 @@ public class ChoiceHandler {
 
     public static void visuEtudiantBloc() {
         System.out.println("code du bloc : ");
-        String code = scanner.nextLine();
+        int numBloc = scanner.nextInt();
 
         try {
-            ResultSet rs = UtilsDb.select("numero_etudiant, nom, prenom, email",
-                    "etudiants", "WHERE numero_bloc = "+code);
+            ResultSet rs = DB.select("e.numero_etudiant, e.nom, e.prenom, e.email",
+                    "etudiants e", "WHERE numero_bloc = ",0+numBloc, "");
             while (rs.next()) {
                 System.out.println("  "+rs.getString("numero_etudiant")+" "+
                         rs.getString("nom")+" "+rs.getString("prenom")+" "+
@@ -99,8 +106,8 @@ public class ChoiceHandler {
 
     public static void visuNbrCreditPae() {
         try {
-            ResultSet rs = UtilsDb.select("numero_etudiant, nom, prenom, email",
-                    "etudiants", "WHERE numero_bloc IS NULL");
+            ResultSet rs = DB.select("e.numero_etudiant, e.nom, e.prenom, e.email",
+                    "etudiants e", "WHERE numero_bloc ", "IS NULL", "");
             while (rs.next()) {
                 System.out.println("  "+rs.getString("numero_etudiant")+" "+
                         rs.getString("nom")+" "+rs.getString("prenom")+" "+
@@ -114,9 +121,39 @@ public class ChoiceHandler {
     }
 
     public static void visuEtudiantDontPaePasValide() {
+        System.out.println("code du bloc : ");
+        int numBloc = scanner.nextInt();
 
+        try {
+            ResultSet rs = DB.select("e.numero_etudiant, e.nom, e.prenom, e.email",
+                    "etudiants e", "numero_bloc = ", 0+numBloc, "");
+            while (rs.next()) {
+                System.out.println("  "+rs.getString("numero_etudiant")+" "+
+                        rs.getString("nom")+" "+rs.getString("prenom")+" "+
+                        rs.getString("email"));
+            }
+        } catch (StatementAndSQLException e){
+            e.printStackTrace();
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
     }
 
     public static void visuUeBloc() {
+        System.out.println("numero du bloc : ");
+        int numBloc = scanner.nextInt();
+
+        try {
+            ResultSet rs = DB.select("ue.code, ue.nom, ue.nbr_inscrit", "unites_enseignement ue",
+                    "numero_bloc = ", 0+numBloc,"ORDER BY nbr_inscrit");
+            while (rs.next()) {
+                System.out.println("  "+rs.getString("code")+" "+
+                        rs.getString("nom")+"\tavec "+rs.getString("nbr_inscrit")+" inscrit(s)");
+            }
+        } catch (StatementAndSQLException e){
+            e.printStackTrace();
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
     }
 }
