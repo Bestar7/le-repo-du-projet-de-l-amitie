@@ -120,13 +120,15 @@ public class ChoiceHandler {
         }
     }
 
-    public static void visuEtudiantDontPaePasValide() {
+    public static void visuEtudiantDontPaePasValide() { // TODO fix this mess
+        /*
         System.out.println("code du bloc : ");
         int numBloc = scanner.nextInt();
+        */
 
         try {
             ResultSet rs = DB.select("e.numero_etudiant, e.nom, e.prenom, e.email",
-                    "etudiants e", "numero_bloc = ", 0+numBloc, "");
+                    "etudiants e", "numero_bloc IS NULL", "", "");
             while (rs.next()) {
                 System.out.println("  "+rs.getString("numero_etudiant")+" "+
                         rs.getString("nom")+" "+rs.getString("prenom")+" "+
