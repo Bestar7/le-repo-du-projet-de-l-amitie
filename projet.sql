@@ -223,11 +223,18 @@ $$ LANGUAGE plpgsql;
 --Ajouter un prerequis
 CREATE OR REPLACE FUNCTION projet.ajouter_prerequis(int, int) RETURNS VOID AS $$
     DECLARE
-        prerequise ALIAS FOR $1;
-        requise ALIAS FOR $2;
+        id_prerequise ALIAS FOR $1;
+        id_requise ALIAS FOR $2;
+        ue_prereq RECORD;
+        ue_req RECORD;
     BEGIN
+        SELECT ue.* FROM projet.unites_enseignement ue WHERE id_ue = id_prerequise INTO ue_prereq;
+        SELECT ue.* FROM projet.unites_enseignement ue WHERE id_ue = id_requise INTO ue_req;
+        IF(ue_prereq.numero_bloc >= ue_req) THEN
+            RAISE 'PAS CONTENT';
+        END IF;
         INSERT INTO projet.prerequis VALUES
-         (prerequise, requise);
+         (id_prerequise, id_requise);
     END;
 $$ LANGUAGE plpgsql;
 
