@@ -52,7 +52,6 @@ public class DB {
         */
         PreparedStatement statement = conn.prepareStatement(query);
         statement.setString(1, rightConditions);
-        System.out.println(statement.toString());
         return statement.executeQuery();
     }
 
@@ -71,10 +70,19 @@ public class DB {
             throw new StatementAndSQLException(query);
         }
         */
-        PreparedStatement statement = conn.prepareStatement(query);
-        statement.setInt(1, rightConditions);
-        System.out.println(statement.toString());
-        return statement.executeQuery();
+        PreparedStatement statement = null;
+        try {
+            statement = conn.prepareStatement(query);
+
+            statement.setInt(1, rightConditions);
+            System.out.println(statement.toString());
+            return statement.executeQuery();
+        } catch (StatementAndSQLException e){
+            throw new StatementAndSQLException(statement);
+        } finally {
+            conn.close();
+        }
+
     }
 
     /* TODO INUTILE ???

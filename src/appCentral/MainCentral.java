@@ -1,5 +1,6 @@
 package appCentral;
 
+import java.sql.*;
 import java.util.Scanner;
 
 public class MainCentral {
@@ -24,6 +25,41 @@ public class MainCentral {
             int choix = readChoiceEtudiant();
             choicesEtudiant(choix);
         }
+    }
+
+    private String url="jdbc:postgresql://postgres.ipl.be/pubs2?user=public&password=public";
+    private PreparedStatement listeAuteurs;
+    private PreparedStatement listeAuteursAvecNom;
+    private Connection conn=null;
+    public MainCentral(){
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            System.out.println("Driver PostgreSQL manquant !");
+            System.exit(1);
+        }
+        try {
+            conn=DriverManager.getConnection(url);
+        } catch (SQLException e) {
+            System.out.println("Impossible de joindre le server !");
+            System.exit(1);
+        }
+        /*
+        try {
+
+            listeAuteurs=
+                    conn.prepareStatement("SELECT nom" +
+                            " FROM projet.etudiants");
+            listeAuteursAvecNom=
+                    conn.prepareStatement("SELECT au_lname" +
+                            " FROM Authors" +
+                            " WHERE au_fname LIKE ?");
+
+        } catch (SQLException e) {
+            System.out.println("Erreur avec les requêtes SQL !");
+            System.exit(1);
+        }
+        */
     }
 
     private static void logIn() {
