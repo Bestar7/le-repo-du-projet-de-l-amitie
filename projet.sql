@@ -294,8 +294,87 @@ SELECT * FROM projet.afficher_ue_bloc WHERE 'Numero bloc' = ?;
 -------------------Application etudiant
 
 --Ajouter une UE a son PAE
+CREATE OR REPLACE FUNCTION projet.ajouter_ue_pae(int,int) RETURNS VOID AS $$
+    DECLARE
+        ue_ajouter ALIAS FOR $1;
+        etud ALIAS FOR $2;
+    BEGIN
+        INSERT INTO projet.pae_ue VALUES
+            (ue_ajouter,etud);
+    END;
+$$LANGUAGE plpgsql;
+
 --Enlever une UE a son PAE
+CREATE OR REPLACE FUNCTION projet.retirer_ue_pae(int,int) RETURNS VOID AS $$
+    DECLARE
+        ue_retirer ALIAS FOR $1;
+        etud ALIAS FOR $2;
+    BEGIN
+       DELETE FROM projet.pae_ue pu
+        WHERE pu.etudiant = etud AND
+              pu.ue = ue_retirer;
+    END;
+$$LANGUAGE plpgsql;
+
 --Valider son PAE
+CREATE OR REPLACE FUNCTION projet.valider_pae(int) RETURNS VOID AS $$
+    DECLARE
+        num_etud ALIAS FOR $1;
+    BEGIN
+       UPDATE projet.paes p
+        SET est_valide = TRUE
+        WHERE p.etudiant = num_etud;
+    END;
+$$LANGUAGE plpgsql;
+
 --Afficher les UE auxquelles un etudiant peut s'inscrire
+CREATE VIEW projet.afficher_ue_inscrivable AS
+    SELECT UE.code, UE.nom, UE.nbr_credit, UE.numero_bloc
+    FROM projet.unites_enseignement UE, projet.etudiants e
+    WHERE e.numero_etudiant = 'Numero Etudiant' AND
+          UE.id_ue NOT IN (--ue dans pae
+            SELECT p.ue
+            FROM projet.pae_ue p
+            WHERE p.etudiant = e.numero_etudiant) AND
+          UE.id_ue NOT IN (--ue dans acquis
+                SELECT a.ue
+                FROM projet.acquis a
+                WHERE a.etudiant = e.numero_etudiant) AND
+          UE.id_ue IN (--ue prerequis
+                SELECT DISTINCT ue_qui_requiert
+                FROM projet.prerequis pr
+                WHERE ue_requise IN (
+                    SELECT a.ue
+                    FROM projet.acquis a
+                    WHERE a.etudiant = e.numero_etudiant)) AND
+          UE.id_ue NOT IN(--retirer ue bloc 2 et 3 si pas 30 credit valide
+                SELECT ue2.id_ue
+                FROM projet.unites_enseignement ue2
+                WHERE ue2.numero_bloc > 1 AND
+                      e.nbr_credit_valide < 30
+          );
+SELECT * FROM projet.afficher_ue_inscrivable
+WHERE 'Numero Etudiant' = ?;
+
 --Afficher son PAE
+CREATE VIEW projet.afficher_pae AS
+    SELECT ue.code, ue.nom, ue.nbr_credit, ue.numero_bloc
+    FROM projet.unites_enseignement ue, projet.pae_ue pu
+    WHERE ue.id_ue = pu.ue and 'Numero Etudiant' = pu.etudiant;
+
+SELECT * FROM projet.afficher_pae;
+
 --Reinitialiser son PAE
+CREATE OR REPLACE FUNCTION projet.reinitialiser_pae(int) RETURNS VOID AS $$
+    DECLARE
+        etud ALIAS FOR $1;
+        pae record;
+    BEGIN
+        SELECT p.* FROM projet.paes p WHERE etudiant = etud INTO pae;
+        IF(pae.est_valide) THEN
+            RAISE 'PAE déjà validé! Vous ne pouvez pas le réinitialiser';
+        END IF;
+        DELETE FROM projet.pae_ue pu
+        WHERE pu.etudiant = etud;
+    END;
+$$LANGUAGE  plpgsql;
