@@ -7,7 +7,6 @@ import connection.DB;
 public class MainCentral {
     private static Scanner scanner = new Scanner(System.in);
 
-    // array choix TODO améliorer ???
     private static final String[] OPTIONS = new String[] {
             "ajouter une UE",
             "ajouter un prérequis à une EU",
@@ -30,7 +29,6 @@ public class MainCentral {
         DB db = new DB(user, mdp);
         ChoiceHandler ch = new ChoiceHandler(db);
 
-        logIn();
         while (true) {
             printChoicesEtudiant();
             int choix = readChoiceEtudiant();
@@ -40,10 +38,6 @@ public class MainCentral {
 
     public static void main(String[] args) {
         new MainCentral();
-    }
-
-    private static void logIn() {
-        System.out.println("Bonjour, administrateur !");
     }
 
     private static void printChoicesEtudiant() {
@@ -75,7 +69,6 @@ public class MainCentral {
         return choix;
     }
 
-    // TODO peut-Ãªtre utiliser un pattern chain of command ???
     private void choicesEtudiant(ChoiceHandler ch, int choix) {
         switch (choix) {
             case 1:

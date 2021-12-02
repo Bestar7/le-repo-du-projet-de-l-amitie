@@ -8,6 +8,43 @@ import connection.DB;
 public class ChoiceHandler {
 
     private static Scanner scanner = new Scanner(System.in);
+    
+    private Connection conn;
+    public ChoiceHandler(DB db){
+        conn = db.getConnection();
+
+        try {
+        	//1.DONE
+            ue = conn.prepareStatement("SELECT projet.ajouter_ue(?,?,?,?);");
+            //2.DONE
+            prerequis = conn.prepareStatement("SELECT projet.ajouter_prerequis(?,?);");
+            //3.DONE
+            etudiant = conn.prepareStatement("SELECT projet.ajouter_etudiant(?,?,?,?);");
+            //4.DONE
+            ueValide = conn.prepareStatement("SELECT projet.ajouter_acquis(?,?);");
+            //5.DONE
+            etudiantBloc = conn.prepareStatement(
+                    "SELECT e.numero_etudiant, e.nom, e.prenom, e.email\n" +
+                    "FROM projet.etudiants e\n" +
+                    "WHERE e.numero_bloc = ?;");
+            //6.DONE
+            nbrCreditPae = conn.prepareStatement(
+                    "SELECT * FROM projet.afficher_tout_etudiant;");
+            //7.DONE
+            paePasValide = conn.prepareStatement(
+                    "SELECT * FROM projet.afficher_etudiant_pae_non_valide;");
+            //8.DONE
+            ueBloc = conn.prepareStatement(
+                    "SELECT *\n"
+                    + "FROM projet.afficher_ue_bloc\n"
+                    + "WHERE \"Numero Bloc\" = ?;");
+
+        } catch (SQLException e) {
+            System.out.println("Erreur avec les requêtes SQL !");
+            close();
+            System.exit(1);
+        }
+    }
 
     private PreparedStatement ue; // 1.DONE
     public void ajouterUe() {
@@ -164,44 +201,6 @@ public class ChoiceHandler {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }
-    }
-
-    
-    private Connection conn;
-    public ChoiceHandler(DB db){
-        conn = db.getConnection();
-
-        try {
-        	//1.DONE
-            ue = conn.prepareStatement("SELECT projet.ajouter_ue(?,?,?,?);");
-            //2.DONE
-            prerequis = conn.prepareStatement("SELECT projet.ajouter_prerequis(?,?);");
-            //3.DONE
-            etudiant = conn.prepareStatement("SELECT projet.ajouter_etudiant(?,?,?,?);");
-            //4.DONE
-            ueValide = conn.prepareStatement("SELECT projet.ajouter_acquis(?,?);");
-            //5.DONE
-            etudiantBloc = conn.prepareStatement(
-                    "SELECT e.numero_etudiant, e.nom, e.prenom, e.email\n" +
-                    "FROM projet.etudiants e\n" +
-                    "WHERE e.numero_bloc = ?;");
-            //6.DONE
-            nbrCreditPae = conn.prepareStatement(
-                    "SELECT * FROM projet.afficher_tout_etudiant;");
-            //7.DONE
-            paePasValide = conn.prepareStatement(
-                    "SELECT * FROM projet.afficher_etudiant_pae_non_valide;");
-            //8.DONE
-            ueBloc = conn.prepareStatement(
-                    "SELECT *\n"
-                    + "FROM projet.afficher_ue_bloc\n"
-                    + "WHERE \"Numero Bloc\" = ?;");
-
-        } catch (SQLException e) {
-            System.out.println("Erreur avec les requêtes SQL !");
-            close();
-            System.exit(1);
         }
     }
 
