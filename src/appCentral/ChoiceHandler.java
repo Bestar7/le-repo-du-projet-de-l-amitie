@@ -25,6 +25,7 @@ public class ChoiceHandler {
         System.out.println("Numéro de bloc de la nouvelle UE : ");
         int numBloc = scanner.nextInt();
 
+        /*
         try{
             // TODO
             DB.select("","function ajouterUE");
@@ -32,6 +33,7 @@ public class ChoiceHandler {
         } catch (StatementAndSQLException e){
             e.printStackTrace();
         }
+        */
     }
 
     private PreparedStatement prerequis;
@@ -41,6 +43,7 @@ public class ChoiceHandler {
         System.out.println("Code de l'UE requise par la première : ");
         String ueRequise = scanner.nextLine();
 
+        /*
         try{
             // TODO
             DB.select("","function ajouterPrerequis");
@@ -48,6 +51,7 @@ public class ChoiceHandler {
         } catch (StatementAndSQLException e){
             e.printStackTrace();
         }
+        */
     }
 
     // TODO faut-il déjà prévoir les étudiants qui change d'école ??? -> nbrDeCredit, bloc ???
@@ -63,6 +67,7 @@ public class ChoiceHandler {
         System.out.println("Mot de passe de l'étudiant  : ");
         String mdp = scanner.nextLine();
 
+        /*
         try{
             // TODO
             DB.select("","function ajouterEtudiant");
@@ -70,6 +75,7 @@ public class ChoiceHandler {
         } catch (StatementAndSQLException e){
             e.printStackTrace();
         }
+        */
     }
 
     // TODO crée une view pour trouver le num d'étudiant avec son email
@@ -80,12 +86,14 @@ public class ChoiceHandler {
         System.out.println("code de l'UE acquise par l'étudiant  : ");
         String code = scanner.nextLine();
 
+        /*
         try{
             DB.select("","function validerUE");
             //UtilsDb.insert("acquis", String.format(" '______________ ", email));
         } catch (StatementAndSQLException e){
             e.printStackTrace();
         }
+        */
     }
 
     private PreparedStatement etudiantBloc;
@@ -107,14 +115,14 @@ public class ChoiceHandler {
         }
     }
 
-    private PreparedStatement nbrCreditPae;
+    private PreparedStatement nbrCreditPae; // TODO View
     public void visuNbrCreditPae() {
         try {
             try (ResultSet rs = nbrCreditPae.executeQuery()) {
                 while (rs.next()) {
                     System.out.println("  "+rs.getInt("numero_etudiant")+" "+
                             rs.getString("nom")+" "+rs.getString("prenom")+" "+
-                            rs.getString("email"));
+                            rs.getString("email")+" avec "+rs.getInt("nbrCreditPae")+" credit dans son PAE");
                 }
             }
         } catch (SQLException e) {
@@ -155,7 +163,7 @@ public class ChoiceHandler {
         }
     }
 
-    private String url="jdbc:postgresql://postgres.ipl.be/pubs2?user=public&password=public";
+    private String url = "jdbc:postgresql://172.24.2.6:5432/dbjoachimbastin";
     private Connection conn=null;
     public ChoiceHandler(){
         { // connexion
@@ -166,7 +174,8 @@ public class ChoiceHandler {
                 System.exit(1);
             }
             try {
-                conn = DriverManager.getConnection(url);
+                // TODO changer user et mdp pas en clair ???
+                conn = DriverManager.getConnection(url,"joachimbastin","IQXR6CLVW");
             } catch (SQLException e) {
                 System.out.println("Impossible de joindre le server !");
                 System.exit(1);
