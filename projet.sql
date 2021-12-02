@@ -263,13 +263,16 @@ CREATE OR REPLACE FUNCTION projet.ajouter_etudiant(varchar,varchar,varchar,varch
 $$LANGUAGE plpgsql;
 
 --Ajouter une UE validee pour un etudiant
-CREATE OR REPLACE FUNCTION projet.ajouter_acquis(int,int) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION projet.ajouter_acquis(varchar,varchar) RETURNS VOID AS $$
     DECLARE
-        id_etudiant ALIAS FOR $1;
-        id_ue ALIAS FOR $2;
+        email_etudiant ALIAS FOR $1;
+        code_ue ALIAS FOR $2;
     BEGIN
-        INSERT INTO projet.acquis VALUES
-            (id_etudiant, id_ue);
+        INSERT INTO projet.acquis
+		SELECT e.numero_etudiant, ue.id_ue
+		FROM projet.etudiants e, projet.unites_enseignement ue
+		WHERE e.email = email_etudiant
+		AND ue.code = code_ue;
     END;
 $$LANGUAGE plpgsql;
 
