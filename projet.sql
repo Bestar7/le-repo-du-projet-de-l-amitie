@@ -1,9 +1,8 @@
 DROP SCHEMA IF EXISTS projet CASCADE;
 CREATE SCHEMA projet;
 
-CREATE TYPE numero_bloc AS ENUM (1,2,3);
 CREATE TABLE projet.blocs (
-    numero_bloc numero_bloc PRIMARY KEY
+    numero_bloc numero_bloc PRIMARY KEY CHECK (numero_bloc>=1 AND numero_bloc <=3)
 );
 
 CREATE TABLE projet.etudiants (
