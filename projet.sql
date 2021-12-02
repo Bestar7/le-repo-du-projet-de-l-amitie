@@ -235,11 +235,11 @@ $$ LANGUAGE plpgsql;
 --Ajouter un prerequis
 CREATE OR REPLACE FUNCTION projet.ajouter_prerequis(int, int) RETURNS VOID AS $$
     DECLARE
-        id_prerequise ALIAS FOR $1;
+        id_qui_requiert ALIAS FOR $1;
         id_requise ALIAS FOR $2;
     BEGIN
         INSERT INTO projet.prerequis VALUES
-         (id_prerequise, id_requise);
+         (id_qui_requiert, id_requise);
     END;
 $$ LANGUAGE plpgsql;
 
