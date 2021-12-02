@@ -2,7 +2,7 @@ DROP SCHEMA IF EXISTS projet CASCADE;
 CREATE SCHEMA projet;
 
 CREATE TABLE projet.blocs (
-    numero_bloc numero_bloc PRIMARY KEY CHECK (numero_bloc>=1 AND numero_bloc <=3)
+    numero_bloc int PRIMARY KEY CHECK (numero_bloc>=1 AND numero_bloc <=3)
 );
 
 CREATE TABLE projet.etudiants (
