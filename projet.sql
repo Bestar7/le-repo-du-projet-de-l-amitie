@@ -1,9 +1,8 @@
 DROP SCHEMA IF EXISTS projet CASCADE;
 CREATE SCHEMA projet;
 
-CREATE TYPE numero_bloc AS ENUM (1,2,3);
 CREATE TABLE projet.blocs (
-    numero_bloc numero_bloc PRIMARY KEY
+    numero_bloc INT PRIMARY KEY NOT NULL CHECK (numero_bloc < 4 OR numero_bloc > 0)
 );
 
 CREATE TABLE projet.etudiants (
@@ -206,14 +205,34 @@ DECLARE
         ue_prereq RECORD;
         ue_req RECORD;
     BEGIN
-        SELECT ue.* FROM projet.unites_enseignement ue WHERE id_ue = NEW.id_prerequise INTO ue_prereq;
-        SELECT ue.* FROM projet.unites_enseignement ue WHERE id_ue = NEW.id_requise INTO ue_req;
+        SELECT ue.* FROM projet.unites_enseignement ue WHERE id_ue = NEW.ue_qui_requiert INTO ue_prereq;
+        SELECT ue.* FROM projet.unites_enseignement ue WHERE id_ue = NEW.ue_requise INTO ue_req;
         IF(ue_prereq.numero_bloc >= ue_req.numero_bloc) THEN
             RAISE 'Le bloc de l unite d enseignement doit etre inferieurs a celle requise';
         END IF;
         RETURN NULL;
     END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION projet.verifie_ajouter_ue_pae() RETURNS TRIGGER AS $$
+    DECLARE
+        ue_ajout RECORD;
+        etud_ajout RECORD;
+    BEGIN
+        SELECT * FROM projet.unites_enseignement WHERE id_ue = NEW.ue INTO ue_ajout;
+        SELECT * FROM projet.paes WHERE etudiant = NEW.etudiant INTO etud_ajout;
+
+        IF(etud_ajout.est_valide) THEN
+            RAISE'PAE déjà validé';
+        ELSIF(SELECT * FROM projet.acquis a WHERE a.etudiant = etud_ajout.etudiant AND a.ue = ue_ajout.id_ue IN (SELECT * FROM projet.acquis)) THEN
+            RAISE'UE déjà validée';
+        ESLIF(SELECT ) THEN
+            RAISE'Tout les prérequise n ont pas été validé';
+        ESLIF() THEN
+            RAISE'UE ne peut que être du bloc 1';
+        END IF;
+    END;
+$$LANGUAGE plpgsql;
 
 
 
@@ -245,7 +264,7 @@ CREATE OR REPLACE FUNCTION projet.ajouter_prerequis(int, int) RETURNS VOID AS $$
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trigger_verifier_prerequis BEFORE INSERT ON projet.prerequis
-    FOR EACH ROW EXECUTE PROCEDURE projet.ajouter_prerequis();
+    FOR EACH ROW EXECUTE PROCEDURE projet.verifie_add_prerequis();
 
 --Ajouter un etudiant
 CREATE OR REPLACE FUNCTION projet.ajouter_etudiant(varchar,varchar,varchar,varchar) RETURNS VOID AS $$
@@ -320,7 +339,8 @@ CREATE OR REPLACE FUNCTION projet.ajouter_ue_pae(int,int) RETURNS VOID AS $$
     END;
 $$LANGUAGE plpgsql;
 
-CREATE TRIGGER trigger_
+CREATE TRIGGER trigger_ajoute_ue_pae BEFORE INSERT ON projet.pae_ue
+    FOR EACH ROW EXECUTE PROCEDURE projet.verifie_ajouter_ue_pae();
 
 --Enlever une UE a son PAE
 CREATE OR REPLACE FUNCTION projet.retirer_ue_pae(int,int) RETURNS VOID AS $$
@@ -333,6 +353,8 @@ CREATE OR REPLACE FUNCTION projet.retirer_ue_pae(int,int) RETURNS VOID AS $$
               pu.ue = ue_retirer;
     END;
 $$LANGUAGE plpgsql;
+
+--CREATE TRIGGER
 
 --Valider son PAE
 CREATE OR REPLACE FUNCTION projet.valider_pae(int) RETURNS VOID AS $$
