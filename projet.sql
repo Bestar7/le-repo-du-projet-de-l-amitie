@@ -233,13 +233,16 @@ CREATE OR REPLACE FUNCTION projet.ajouter_ue(varchar,varchar,int,int) RETURNS VO
 $$ LANGUAGE plpgsql;
 
 --Ajouter un prerequis
-CREATE OR REPLACE FUNCTION projet.ajouter_prerequis(int, int) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION projet.ajouter_prerequis(varchar, varchar) RETURNS VOID AS $$
     DECLARE
-        id_qui_requiert ALIAS FOR $1;
-        id_requise ALIAS FOR $2;
+        code_qui_requiert ALIAS FOR $1;
+        code_requise ALIAS FOR $2;
     BEGIN
-        INSERT INTO projet.prerequis VALUES
-         (id_qui_requiert, id_requise);
+        INSERT INTO projet.prerequis (ue_qui_requiert, ue_requise)
+        SELECT ue_requise.id_ue, ue_requiert.id_ue
+        FROM projet.unites_enseignement ue_requise, projet.unites_enseignement ue_requiert
+        WHERE ue_requise.code = code_requise
+        AND ue_requiert.code = code_qui_requiert;
     END;
 $$ LANGUAGE plpgsql;
 
