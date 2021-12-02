@@ -4,14 +4,14 @@ import java.sql.*;
 
 public class DB {
 
-    private static Connection conn;
-
-    static {
-        initDriver();
-        setConnexion();
+    private Connection conn;
+    
+    public DB(String user, String mdp) {
+    	initDriver();
+        setConnexion(user, mdp);
     }
 
-    private static void initDriver() {
+    private void initDriver() {
         try {
             Class.forName("org.postgresql.Driver");
         } catch (ClassNotFoundException e) {
@@ -20,87 +20,21 @@ public class DB {
         }
     }
 
-    private static void setConnexion() {
-        String url = "jdbc:postgresql://172.24.2.6:5432/dbjoachimbastin";
+    private void setConnexion(String user, String mdp) {
+    	String url = "jdbc:postgresql://localhost:5432/Projet 2021";//"jdbc:postgresql://172.24.2.6:5432/dbjoachimbastin";
+        //String user = "postgres";//"joachimbastin";
+        //String mdp = "Mcs1ap65";//"IQXR6CLVW";
         try {
-            conn = DriverManager.getConnection(url,"joachimbastin","IQXR6CLVW");
+            conn = DriverManager.getConnection(url, user, mdp);
         } catch (SQLException e) {
             System.out.println("Impossible de joindre le server !");
             System.exit(1);
         }
     }
-
-    public static ResultSet select(String columns, String from) throws StatementAndSQLException{
-        //return select(columns, from, "1=1");
-        return null;
+    
+    public Connection getConnection() {
+    	return conn;
     }
-
-    public static ResultSet select(String columns, String from, String leftConditions, String rightConditions, String orderBy) throws SQLException {
-        String query = String.format("SELECT %s \n", columns) +
-                String.format("FROM projet.%s \n", from) +
-                String.format("WHERE %s ?\n", leftConditions) +
-                String.format("%s;", orderBy);
-        /*
-        try (PreparedStatement statement = conn.prepareStatement(query)) {
-            statement.setString(1, columns);
-            statement.setString(2, from);
-            statement.setString(3, conditions);
-            return statement.executeQuery();
-        } catch (SQLException se) {
-            throw new StatementAndSQLException(query);
-        }
-        */
-        PreparedStatement statement = conn.prepareStatement(query);
-        statement.setString(1, rightConditions);
-        return statement.executeQuery();
-    }
-
-    public static ResultSet select(String columns, String from, String leftConditions, int rightConditions, String orderBy) throws SQLException {
-        String query = String.format("SELECT %s \n", columns) +
-                String.format("FROM projet.%s \n", from) +
-                String.format("WHERE %s ?\n", leftConditions) +
-                String.format("%s;", orderBy);
-        /*
-        try (PreparedStatement statement = conn.prepareStatement(query)) {
-            statement.setString(1, columns);
-            statement.setString(2, from);
-            statement.setString(3, conditions);
-            return statement.executeQuery();
-        } catch (SQLException se) {
-            throw new StatementAndSQLException(query);
-        }
-        */
-
-        /*
-        PreparedStatement statement = null;
-        try {
-            statement = conn.prepareStatement(query);
-
-            statement.setInt(1, rightConditions);
-            System.out.println(statement.toString());
-            return statement.executeQuery();
-        } catch (StatementAndSQLException e){
-            throw new StatementAndSQLException(statement);
-        } finally {
-            conn.close();
-        }
-        */
-        return null;
-    }
-
-    /* TODO INUTILE ???
-    private static DB instance;
-
-    public static connection.DB getInstance() {
-        if (instance == null)
-            instance = new connection.DB();
-        return instance;
-    }
-
-    public static Connection getConnection(){
-        return conn;
-    }
-    */
 
     public void closeConnection(){
         try {

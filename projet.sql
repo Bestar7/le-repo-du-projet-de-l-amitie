@@ -1,9 +1,8 @@
 DROP SCHEMA IF EXISTS projet CASCADE;
 CREATE SCHEMA projet;
 
-CREATE TYPE numero_bloc AS ENUM (1,2,3);
 CREATE TABLE projet.blocs (
-    numero_bloc numero_bloc PRIMARY KEY
+    numero_bloc int PRIMARY KEY CHECK (numero_bloc>=1 AND numero_bloc <=3)
 );
 
 CREATE TABLE projet.etudiants (
@@ -234,13 +233,16 @@ CREATE OR REPLACE FUNCTION projet.ajouter_ue(varchar,varchar,int,int) RETURNS VO
 $$ LANGUAGE plpgsql;
 
 --Ajouter un prerequis
-CREATE OR REPLACE FUNCTION projet.ajouter_prerequis(int, int) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION projet.ajouter_prerequis(varchar, varchar) RETURNS VOID AS $$
     DECLARE
-        id_prerequise ALIAS FOR $1;
-        id_requise ALIAS FOR $2;
+        code_qui_requiert ALIAS FOR $1;
+        code_requise ALIAS FOR $2;
     BEGIN
-        INSERT INTO projet.prerequis VALUES
-         (id_prerequise, id_requise);
+        INSERT INTO projet.prerequis (ue_qui_requiert, ue_requise)
+        SELECT ue_requise.id_ue, ue_requiert.id_ue
+        FROM projet.unites_enseignement ue_requise, projet.unites_enseignement ue_requiert
+        WHERE ue_requise.code = code_requise
+        AND ue_requiert.code = code_qui_requiert;
     END;
 $$ LANGUAGE plpgsql;
 
@@ -261,13 +263,16 @@ CREATE OR REPLACE FUNCTION projet.ajouter_etudiant(varchar,varchar,varchar,varch
 $$LANGUAGE plpgsql;
 
 --Ajouter une UE validee pour un etudiant
-CREATE OR REPLACE FUNCTION projet.ajouter_acquis(int,int) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION projet.ajouter_acquis(varchar,varchar) RETURNS VOID AS $$
     DECLARE
-        id_etudiant ALIAS FOR $1;
-        id_ue ALIAS FOR $2;
+        email_etudiant ALIAS FOR $1;
+        code_ue ALIAS FOR $2;
     BEGIN
-        INSERT INTO projet.acquis VALUES
-            (id_etudiant, id_ue);
+        INSERT INTO projet.acquis
+		SELECT e.numero_etudiant, ue.id_ue
+		FROM projet.etudiants e, projet.unites_enseignement ue
+		WHERE e.email = email_etudiant
+		AND ue.code = code_ue;
     END;
 $$LANGUAGE plpgsql;
 

@@ -1,26 +1,34 @@
 package appCentral;
 
-import java.sql.*;
 import java.util.Scanner;
+
+import connection.DB;
 
 public class MainCentral {
     private static Scanner scanner = new Scanner(System.in);
 
-    // array choix TODO amÃ©liorer ???
+    // array choix TODO améliorer ???
     private static final String[] OPTIONS = new String[] {
             "ajouter une UE",
-            "ajouter un prÃ©requis Ã  une EU",
-            "ajouter un Ã©tudiant",
-            "Encoder une UE validÃ©e par un Ã©tudiant",
-            "Visualiser les Ã©tudiants d'un bloc",
-            "visualiser le nombre crÃ©dit du PAE de tout les Ã©tudiants",
-            "visualiser les Ã©tudiants qui n'ont pas validÃ© leur PAE",
+            "ajouter un prérequis à une EU",
+            "ajouter un étudiant",
+            "Encoder une UE validée par un étudiant",
+            "Visualiser les étudiants d'un bloc",
+            "visualiser le nombre crédit du PAE de tout les étudiants",
+            "visualiser les étudiants qui n'ont pas validé leur PAE",
             "visualiser les UE d'un bloc",
     };
 
 
     public MainCentral(){
-        ChoiceHandler ch = new ChoiceHandler();
+        
+        System.out.println("Veuillez entrer votre nom d'utilisateur");
+        String user = scanner.nextLine();
+        System.out.println("Veuillez entrer votre mot de passe");
+        String mdp = scanner.nextLine();
+        
+        DB db = new DB(user, mdp);
+        ChoiceHandler ch = new ChoiceHandler(db);
 
         logIn();
         while (true) {
@@ -95,6 +103,7 @@ public class MainCentral {
                 ch.visuUeBloc();
                 break;
             default:
+            	ch.close();
                 System.exit(0);
         }
     }
