@@ -218,12 +218,6 @@ $$ LANGUAGE plpgsql;
 
 
 
-
-
-
-
-
-
 -------------------Application centrale
 
 --Ajouter une UE
@@ -311,6 +305,7 @@ CREATE VIEW projet.afficher_ue_bloc AS
     ORDER BY ue.nbr_inscrit;
 
 SELECT * FROM projet.afficher_ue_bloc WHERE "Numero Bloc" = ?;
+
 
 -------------------Application etudiant
 
@@ -401,3 +396,4 @@ CREATE OR REPLACE FUNCTION projet.reinitialiser_pae(int) RETURNS VOID AS $$
         WHERE pu.etudiant = etud;
     END;
 $$LANGUAGE  plpgsql;
+

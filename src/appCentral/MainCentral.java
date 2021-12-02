@@ -1,5 +1,6 @@
 package appCentral;
 
+import java.sql.*;
 import java.util.Scanner;
 
 public class MainCentral {
@@ -17,13 +18,20 @@ public class MainCentral {
             "visualiser les UE d'un bloc",
     };
 
-    public static void main(String[] args) {
+
+    public MainCentral(){
+        ChoiceHandler ch = new ChoiceHandler();
+
         logIn();
         while (true) {
             printChoicesEtudiant();
             int choix = readChoiceEtudiant();
-            choicesEtudiant(choix);
+            choicesEtudiant(ch, choix);
         }
+    }
+
+    public static void main(String[] args) {
+        new MainCentral();
     }
 
     private static void logIn() {
@@ -60,31 +68,31 @@ public class MainCentral {
     }
 
     // TODO peut-être utiliser un pattern chain of command ???
-    private static void choicesEtudiant(int choix) {
+    private void choicesEtudiant(ChoiceHandler ch, int choix) {
         switch (choix) {
             case 1:
-                ChoiceHandler.ajouterUe();
+                ch.ajouterUe();
                 break;
             case 2:
-                ChoiceHandler.ajouterPrerequis();
+                ch.ajouterPrerequis();
                 break;
             case 3:
-                ChoiceHandler.ajouterEtudiant();
+                ch.ajouterEtudiant();
                 break;
             case 4:
-                ChoiceHandler.encoderUeValide();
+                ch.encoderUeValide();
                 break;
             case 5:
-                ChoiceHandler.visuEtudiantBloc();
+                ch.visuEtudiantBloc();
                 break;
             case 6:
-                ChoiceHandler.visuNbrCreditPae();
+                ch.visuNbrCreditPae();
                 break;
             case 7:
-                ChoiceHandler.visuEtudiantDontPaePasValide();
+                ch.visuEtudiantDontPaePasValide();
                 break;
             case 8:
-                ChoiceHandler.visuUeBloc();
+                ch.visuUeBloc();
                 break;
             default:
                 System.exit(0);
