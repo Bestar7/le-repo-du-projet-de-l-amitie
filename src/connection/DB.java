@@ -30,20 +30,59 @@ public class DB {
         }
     }
 
-    public static void update(String update) throws StatementAndSQLException{
-        try (PreparedStatement statement = conn.prepareStatement(update)) {
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new StatementAndSQLException(update);
-        }
+    public static ResultSet select(String columns, String from) throws StatementAndSQLException{
+        //return select(columns, from, "1=1");
+        return null;
     }
 
-    public static ResultSet query(String query) throws StatementAndSQLException{
+    public static ResultSet select(String columns, String from, String leftConditions, String rightConditions, String orderBy) throws SQLException {
+        String query = String.format("SELECT %s \n", columns) +
+                String.format("FROM projet.%s \n", from) +
+                String.format("WHERE %s ?\n", leftConditions) +
+                String.format("%s;", orderBy);
+        /*
         try (PreparedStatement statement = conn.prepareStatement(query)) {
+            statement.setString(1, columns);
+            statement.setString(2, from);
+            statement.setString(3, conditions);
             return statement.executeQuery();
         } catch (SQLException se) {
             throw new StatementAndSQLException(query);
         }
+        */
+        PreparedStatement statement = conn.prepareStatement(query);
+        statement.setString(1, rightConditions);
+        return statement.executeQuery();
+    }
+
+    public static ResultSet select(String columns, String from, String leftConditions, int rightConditions, String orderBy) throws SQLException {
+        String query = String.format("SELECT %s \n", columns) +
+                String.format("FROM projet.%s \n", from) +
+                String.format("WHERE %s ?\n", leftConditions) +
+                String.format("%s;", orderBy);
+        /*
+        try (PreparedStatement statement = conn.prepareStatement(query)) {
+            statement.setString(1, columns);
+            statement.setString(2, from);
+            statement.setString(3, conditions);
+            return statement.executeQuery();
+        } catch (SQLException se) {
+            throw new StatementAndSQLException(query);
+        }
+        */
+        PreparedStatement statement = null;
+        try {
+            statement = conn.prepareStatement(query);
+
+            statement.setInt(1, rightConditions);
+            System.out.println(statement.toString());
+            return statement.executeQuery();
+        } catch (StatementAndSQLException e){
+            throw new StatementAndSQLException(statement);
+        } finally {
+            conn.close();
+        }
+
     }
 
     /* TODO INUTILE ???
