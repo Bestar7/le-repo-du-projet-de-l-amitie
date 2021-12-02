@@ -70,6 +70,8 @@ public class DB {
             throw new StatementAndSQLException(query);
         }
         */
+
+        /*
         PreparedStatement statement = null;
         try {
             statement = conn.prepareStatement(query);
@@ -82,7 +84,8 @@ public class DB {
         } finally {
             conn.close();
         }
-
+        */
+        return null;
     }
 
     /* TODO INUTILE ???
