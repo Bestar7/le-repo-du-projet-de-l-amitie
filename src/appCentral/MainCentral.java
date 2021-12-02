@@ -18,48 +18,20 @@ public class MainCentral {
             "visualiser les UE d'un bloc",
     };
 
-    public static void main(String[] args) {
+
+    public MainCentral(){
+        ChoiceHandler ch = new ChoiceHandler();
+
         logIn();
         while (true) {
             printChoicesEtudiant();
             int choix = readChoiceEtudiant();
-            choicesEtudiant(choix);
+            choicesEtudiant(ch, choix);
         }
     }
 
-    private String url="jdbc:postgresql://postgres.ipl.be/pubs2?user=public&password=public";
-    private PreparedStatement listeAuteurs;
-    private PreparedStatement listeAuteursAvecNom;
-    private Connection conn=null;
-    public MainCentral(){
-        try {
-            Class.forName("org.postgresql.Driver");
-        } catch (ClassNotFoundException e) {
-            System.out.println("Driver PostgreSQL manquant !");
-            System.exit(1);
-        }
-        try {
-            conn=DriverManager.getConnection(url);
-        } catch (SQLException e) {
-            System.out.println("Impossible de joindre le server !");
-            System.exit(1);
-        }
-        /*
-        try {
-
-            listeAuteurs=
-                    conn.prepareStatement("SELECT nom" +
-                            " FROM projet.etudiants");
-            listeAuteursAvecNom=
-                    conn.prepareStatement("SELECT au_lname" +
-                            " FROM Authors" +
-                            " WHERE au_fname LIKE ?");
-
-        } catch (SQLException e) {
-            System.out.println("Erreur avec les requêtes SQL !");
-            System.exit(1);
-        }
-        */
+    public static void main(String[] args) {
+        new MainCentral();
     }
 
     private static void logIn() {
@@ -96,31 +68,31 @@ public class MainCentral {
     }
 
     // TODO peut-être utiliser un pattern chain of command ???
-    private static void choicesEtudiant(int choix) {
+    private void choicesEtudiant(ChoiceHandler ch, int choix) {
         switch (choix) {
             case 1:
-                ChoiceHandler.ajouterUe();
+                ch.ajouterUe();
                 break;
             case 2:
-                ChoiceHandler.ajouterPrerequis();
+                ch.ajouterPrerequis();
                 break;
             case 3:
-                ChoiceHandler.ajouterEtudiant();
+                ch.ajouterEtudiant();
                 break;
             case 4:
-                ChoiceHandler.encoderUeValide();
+                ch.encoderUeValide();
                 break;
             case 5:
-                ChoiceHandler.visuEtudiantBloc();
+                ch.visuEtudiantBloc();
                 break;
             case 6:
-                ChoiceHandler.visuNbrCreditPae();
+                ch.visuNbrCreditPae();
                 break;
             case 7:
-                ChoiceHandler.visuEtudiantDontPaePasValide();
+                ch.visuEtudiantDontPaePasValide();
                 break;
             case 8:
-                ChoiceHandler.visuUeBloc();
+                ch.visuUeBloc();
                 break;
             default:
                 System.exit(0);
