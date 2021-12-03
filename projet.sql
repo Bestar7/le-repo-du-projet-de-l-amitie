@@ -232,12 +232,26 @@ CREATE OR REPLACE FUNCTION projet.verifie_ajouter_pae_ue() RETURNS TRIGGER AS $$
 
         IF(etud.est_valide)then
             RAISE'PAE déjà valide';
-        ELSIF(SELECT * FROM projet.acquis a WHERE a.etudiant =  etud.etudiant AND a.ue = ue_ajout.id_ue) then
+        ELSIF(SELECT * FROM projet.acquis a WHERE a.etudiant =  etud.etudiant AND a.ue = ue_ajout.id_ue IN (SELECT * FROM projet.acquis a WHERE a.etudiant = etud.etudiant)) then
             RAISE'UE déjà acquise';
+        ELSIF(SELECT p.ue_requise FROM projet.prerequis p WHERE p.ue_qui_requiert = ue_ajout NOT IN (SELECT a.ue FROM projet.acquis a WHERE a.etudiant = etud.etudiant))then
+            RAISE'Toutes les prerequis ne sont pas acquis';
+        ELSIF((SELECT e.nbr_credit_valide FROM projet.etudiants e WHERE e.numero_etudiant = etud.etudiant) < 30 AND ue_ajout.numero_bloc <> 1)then
+            RAISE'Vous ne pouvez avoir que des cours du bloc 1';
         end if;
-
         RETURN NEW;
     END;
+$$LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION projet.verifie_retirer_pae_ue() RETURNS TRIGGER AS $$
+    DECLARE
+
+    BEGIN
+        IF(SELECT p.est_valide FROM projet.paes p WHERE etudiant = OLD.etudiant)THEN
+            RAISE'PAE déjà validé';
+        end if;
+        RETURN OLD;
+    end;
 $$LANGUAGE plpgsql;
 
 
@@ -352,7 +366,7 @@ CREATE OR REPLACE FUNCTION projet.ajouter_ue_pae(code_ue_ajouter varchar,id_etud
         WHERE ue.code = code_ue_ajouter;
     END;
 $$LANGUAGE plpgsql;
---TODO
+
 CREATE TRIGGER trigger_verifier_ajouter_ue_pae BEFORE INSERT ON projet.pae_ue
     FOR EACH ROW EXECUTE PROCEDURE projet.verifie_ajouter_pae_ue();
 
@@ -370,6 +384,9 @@ CREATE OR REPLACE FUNCTION projet.retirer_ue_pae(code_ue_retirer varchar, id_etu
             WHERE ue.code = code_ue_retirer);
     END;
 $$LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_verifie_retirer_ue_pae BEFORE DELETE ON projet.pae_ue
+    FOR EACH ROW EXECUTE PROCEDURE projet.verifie_retirer_pae_ue();
 
 --Valider son PAE
 CREATE OR REPLACE FUNCTION projet.valider_pae(int) RETURNS VOID AS $$
