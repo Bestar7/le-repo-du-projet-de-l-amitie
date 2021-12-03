@@ -1,17 +1,52 @@
 package appCentral;
 
-import connection.StatementAndSQLException;
-import connection.DB;
-
 import java.sql.*;
 import java.util.Scanner;
+
+import connection.DB;
 
 public class ChoiceHandler {
 
     private static Scanner scanner = new Scanner(System.in);
+    
+    private Connection conn;
+    public ChoiceHandler(DB db){
+        conn = db.getConnection();
 
-    // TODO faire attention au numÃ©ro de bloc, pour qu'il corresponde au bon bloc
-    private PreparedStatement ue;
+        try {
+        	//1.DONE
+            ue = conn.prepareStatement("SELECT projet.ajouter_ue(?,?,?,?);");
+            //2.DONE
+            prerequis = conn.prepareStatement("SELECT projet.ajouter_prerequis(?,?);");
+            //3.DONE
+            etudiant = conn.prepareStatement("SELECT projet.ajouter_etudiant(?,?,?,?);");
+            //4.DONE
+            ueValide = conn.prepareStatement("SELECT projet.ajouter_acquis(?,?);");
+            //5.DONE
+            etudiantBloc = conn.prepareStatement(
+                    "SELECT e.numero_etudiant, e.nom, e.prenom, e.email\n" +
+                    "FROM projet.etudiants e\n" +
+                    "WHERE e.numero_bloc = ?;");
+            //6.DONE
+            nbrCreditPae = conn.prepareStatement(
+                    "SELECT * FROM projet.afficher_tout_etudiant;");
+            //7.DONE
+            paePasValide = conn.prepareStatement(
+                    "SELECT * FROM projet.afficher_etudiant_pae_non_valide;");
+            //8.DONE
+            ueBloc = conn.prepareStatement(
+                    "SELECT *\n"
+                    + "FROM projet.afficher_ue_bloc\n"
+                    + "WHERE \"Numero Bloc\" = ?;");
+
+        } catch (SQLException e) {
+            System.out.println("Erreur avec les requêtes SQL !");
+            close();
+            System.exit(1);
+        }
+    }
+
+    private PreparedStatement ue; // 1.DONE
     public void ajouterUe() {
         System.out.println("Code de la nouvelle UE : ");
         String code = scanner.nextLine();
@@ -19,82 +54,94 @@ public class ChoiceHandler {
         System.out.println("Nom de la nouvelle UE : ");
         String nom = scanner.nextLine();
 
-        System.out.println("Nombre de crÃ©dit de la nouvelle UE : ");
+        System.out.println("Nombre de crédit de la nouvelle UE : ");
         int nbrCredit = scanner.nextInt();
 
-        System.out.println("NumÃ©ro de bloc de la nouvelle UE : ");
+        System.out.println("Numéro de bloc de la nouvelle UE : ");
         int numBloc = scanner.nextInt();
 
-        try{
-            // TODO
-            DB.select("","function ajouterUE");
-            //UtilsDb.insert("unites_enseignement", String.format(" '%s','%s',%d,DEFAULT,%d", code, nom, nbrCredit, numBloc));
-        } catch (StatementAndSQLException e){
+        try {
+            ue.setString(1, code);
+            ue.setString(2, nom);
+            ue.setInt(3, nbrCredit);
+            ue.setInt(4, numBloc);
+
+            ue.executeQuery();
+        } catch (SQLException e) {
+        	System.out.println(ue.toString());
             e.printStackTrace();
         }
     }
 
-    private PreparedStatement prerequis;
+    private PreparedStatement prerequis; // 2.DONE
     public void ajouterPrerequis() {
-        System.out.println("Code de l'UE qui requirt un autre UE : ");
+        System.out.println("Code de l'UE qui requiert un autre UE : ");
         String ueQuiRequiert = scanner.nextLine();
-        System.out.println("Code de l'UE requise par la premiÃ¨re : ");
+        System.out.println("Code de l'UE requise par la première : ");
         String ueRequise = scanner.nextLine();
 
-        try{
-            // TODO
-            DB.select("","function ajouterPrerequis");
-            //UtilsDb.insert("prerequis", String.format(" '%s','%s' ", ueQuiRequiert, ueRequise));
-        } catch (StatementAndSQLException e){
+        try {
+        	prerequis.setString(1, ueQuiRequiert);
+        	prerequis.setString(2, ueRequise);
+
+        	prerequis.executeQuery();
+        } catch (SQLException e) {
+        	System.out.println(prerequis.toString());
             e.printStackTrace();
         }
     }
 
-    // TODO faut-il dÃ©jÃ  prÃ©voir les Ã©tudiants qui change d'Ã©cole ??? -> nbrDeCredit, bloc ???
     // TODO bcrypt du mdp
-    private PreparedStatement etudiant;
+    private PreparedStatement etudiant; // 3.almost DONE
     public void ajouterEtudiant() {
-        System.out.println("Nom de famille de l'Ã©tudiant : ");
+        System.out.println("Nom de famille de l'étudiant : ");
         String nom = scanner.nextLine();
-        System.out.println("PrÃ©nom de l'Ã©tudiant  : ");
+        System.out.println("Prénom de l'étudiant  : ");
         String prenom = scanner.nextLine();
-        System.out.println("Email de l'Ã©tudiant  : ");
+        System.out.println("Email de l'étudiant  : ");
         String email = scanner.nextLine();
-        System.out.println("Mot de passe de l'Ã©tudiant  : ");
+        System.out.println("Mot de passe de l'étudiant  : ");
         String mdp = scanner.nextLine();
 
-        try{
-            // TODO
-            DB.select("","function ajouterEtudiant");
-            //UtilsDb.insert("etudiants", String.format(" '%s','%s','%s','%s' ", nom, prenom,email,mdp));
-        } catch (StatementAndSQLException e){
+        try {
+        	etudiant.setString(1, nom);
+        	etudiant.setString(2, prenom);
+        	etudiant.setString(3, email);
+        	etudiant.setString(4, mdp);
+
+        	etudiant.executeQuery();
+        } catch (SQLException e) {
+        	System.out.println(etudiant.toString());
             e.printStackTrace();
         }
     }
 
-    // TODO crÃ©e une view pour trouver le num d'Ã©tudiant avec son email
-    private PreparedStatement ueValide;
+    private PreparedStatement ueValide; // 4.DONE
     public void encoderUeValide() {
-        System.out.println("email de l'Ã©tudiant : ");
+        System.out.println("email de l'étudiant : ");
         String email = scanner.nextLine();
-        System.out.println("code de l'UE acquise par l'Ã©tudiant  : ");
+        System.out.println("code de l'UE acquise par l'étudiant  : ");
         String code = scanner.nextLine();
 
-        try{
-            DB.select("","function validerUE");
-            //UtilsDb.insert("acquis", String.format(" '______________ ", email));
-        } catch (StatementAndSQLException e){
+        try {
+        	ueValide.setString(1, email);
+        	ueValide.setString(2, code);
+
+        	ueValide.executeQuery();
+        } catch (SQLException e) {
+        	System.out.println(ueValide.toString());
             e.printStackTrace();
         }
     }
 
-    private PreparedStatement etudiantBloc;
+    private PreparedStatement etudiantBloc; // 5.DONE
     public void visuEtudiantBloc() {
-        System.out.println("code du bloc : ");
+        System.out.println("numéro du bloc : ");
         int numBloc = scanner.nextInt();
 
         try {
             etudiantBloc.setInt(1, numBloc);
+            
             try (ResultSet rs = etudiantBloc.executeQuery()) {
                 while (rs.next()) {
                     System.out.println("  "+rs.getInt("numero_etudiant")+" "+
@@ -103,18 +150,20 @@ public class ChoiceHandler {
                 }
             }
         } catch (SQLException e) {
+        	System.out.println(etudiantBloc.toString());
             e.printStackTrace();
         }
     }
 
-    private PreparedStatement nbrCreditPae;
+    private PreparedStatement nbrCreditPae; // 6.DONE
     public void visuNbrCreditPae() {
         try {
             try (ResultSet rs = nbrCreditPae.executeQuery()) {
-                while (rs.next()) {
-                    System.out.println("  "+rs.getInt("numero_etudiant")+" "+
+                while (rs.next()) { //nom,prenom,nbr_credit_total
+                    System.out.println("  "+/*rs.getInt("numero_etudiant")+" "+*/
                             rs.getString("nom")+" "+rs.getString("prenom")+" "+
-                            rs.getString("email"));
+                            /*rs.getString("email")+*/" bloc "+rs.getInt("numero_bloc")+" "+
+                            " avec "+rs.getInt("nbr_credit_total")+" credit dans son PAE");
                 }
             }
         } catch (SQLException e) {
@@ -122,14 +171,14 @@ public class ChoiceHandler {
         }
     }
 
-    private PreparedStatement paePasValide;
+    private PreparedStatement paePasValide; //7.DONE
     public void visuEtudiantDontPaePasValide() {
         try {
             try (ResultSet rs = paePasValide.executeQuery()) {
                 while (rs.next()) {
-                    System.out.println("  "+rs.getInt("numero_etudiant")+" "+
+                    System.out.println("  "/*+rs.getInt("numero_etudiant")+" "*/+
                             rs.getString("nom")+" "+rs.getString("prenom")+" "+
-                            rs.getString("email"));
+                            /*rs.getString("email")+" "+*/rs.getInt("nbr_credit_valide")+" crédit validé" );
                 }
             }
         } catch (SQLException e) {
@@ -137,7 +186,7 @@ public class ChoiceHandler {
         }
     }
 
-    private PreparedStatement ueBloc;
+    private PreparedStatement ueBloc; //8.DONE
     public void visuUeBloc() {
         System.out.println("numero du bloc : ");
         int numBloc = scanner.nextInt();
@@ -155,50 +204,6 @@ public class ChoiceHandler {
         }
     }
 
-    private String url="jdbc:postgresql://postgres.ipl.be/pubs2?user=public&password=public";
-    private Connection conn=null;
-    public ChoiceHandler(){
-        { // connexion
-            try {
-                Class.forName("org.postgresql.Driver");
-            } catch (ClassNotFoundException e) {
-                System.out.println("Driver PostgreSQL manquant !");
-                System.exit(1);
-            }
-            try {
-                conn = DriverManager.getConnection(url);
-            } catch (SQLException e) {
-                System.out.println("Impossible de joindre le server !");
-                System.exit(1);
-            }
-        }
-
-        try {
-            ue = conn.prepareStatement("SELECT e.prenom FROM projet.etudiants e");
-            prerequis = conn.prepareStatement("SELECT e.prenom FROM projet.etudiants e");
-            etudiant = conn.prepareStatement("SELECT e.prenom FROM projet.etudiants e");
-            ueValide = conn.prepareStatement("SELECT e.prenom FROM projet.etudiants e");
-            etudiantBloc = conn.prepareStatement("SELECT e.numero_etudiant, e.nom, e.prenom, e.email\n" +
-                    "FROM projet.etudiants e\n" +
-                    "WHERE numero_bloc = ?");
-            nbrCreditPae = conn.prepareStatement("SELECT e.numero_etudiant, e.nom, e.prenom, e.email\n" +
-                    "FROM projet.etudiants e\n" +
-                    "WHERE e.numero_bloc IS NULL");
-            paePasValide = conn.prepareStatement("SELECT e.numero_etudiant, e.nom, e.prenom, e.email\n" +
-                    "FROM projet.etudiants e\n" +
-                    "WHERE numero_bloc IS NULL");
-            ueBloc = conn.prepareStatement("SELECT ue.code, ue.nom, ue.nbr_inscrit\n" +
-                    "FROM projet.unites_enseignement ue\n" +
-                    "WHERE numero_bloc = ?\n" +
-                    "ORDER BY ue.nbr_inscrit");
-
-        } catch (SQLException e) {
-            System.out.println("Erreur avec les requÃªtes SQL !");
-            System.exit(1);
-        }
-    }
-
-    // TODO utiliser cela
     public void close(){
         try {
             conn.close();

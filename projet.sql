@@ -2,7 +2,7 @@ DROP SCHEMA IF EXISTS projet CASCADE;
 CREATE SCHEMA projet;
 
 CREATE TABLE projet.blocs (
-    numero_bloc INT PRIMARY KEY NOT NULL CHECK (numero_bloc < 4 OR numero_bloc > 0)
+    numero_bloc int PRIMARY KEY CHECK (numero_bloc>=1 AND numero_bloc <=3)
 );
 
 CREATE TABLE projet.etudiants (
@@ -115,7 +115,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trigger_count_nbr_credit_total AFTER INSERT ON projet.paes
     FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_credit_total();
 
---validation du pae
+-- TODO validation du pae
 CREATE OR REPLACE FUNCTION projet.update_validation(etudiant_num INTEGER) RETURNS TRIGGER AS $$
 DECLARE
     credit_total_valide int;
@@ -205,34 +205,14 @@ DECLARE
         ue_prereq RECORD;
         ue_req RECORD;
     BEGIN
-        SELECT ue.* FROM projet.unites_enseignement ue WHERE id_ue = NEW.ue_qui_requiert INTO ue_prereq;
-        SELECT ue.* FROM projet.unites_enseignement ue WHERE id_ue = NEW.ue_requise INTO ue_req;
+        SELECT ue.* FROM projet.unites_enseignement ue WHERE id_ue = NEW.id_prerequise INTO ue_prereq;
+        SELECT ue.* FROM projet.unites_enseignement ue WHERE id_ue = NEW.id_requise INTO ue_req;
         IF(ue_prereq.numero_bloc >= ue_req.numero_bloc) THEN
             RAISE 'Le bloc de l unite d enseignement doit etre inferieurs a celle requise';
         END IF;
         RETURN NULL;
     END;
 $$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION projet.verifie_ajouter_ue_pae() RETURNS TRIGGER AS $$
-    DECLARE
-        ue_ajout RECORD;
-        etud_ajout RECORD;
-    BEGIN
-        SELECT * FROM projet.unites_enseignement WHERE id_ue = NEW.ue INTO ue_ajout;
-        SELECT * FROM projet.paes WHERE etudiant = NEW.etudiant INTO etud_ajout;
-
-        IF(etud_ajout.est_valide) THEN
-            RAISE'PAE déjà validé';
-        ELSIF(SELECT * FROM projet.acquis a WHERE a.etudiant = etud_ajout.etudiant AND a.ue = ue_ajout.id_ue IN (SELECT * FROM projet.acquis)) THEN
-            RAISE'UE déjà validée';
-        ESLIF(SELECT ) THEN
-            RAISE'Tout les prérequise n ont pas été validé';
-        ESLIF() THEN
-            RAISE'UE ne peut que être du bloc 1';
-        END IF;
-    END;
-$$LANGUAGE plpgsql;
 
 
 
@@ -252,19 +232,22 @@ CREATE OR REPLACE FUNCTION projet.ajouter_ue(varchar,varchar,int,int) RETURNS VO
     END;
 $$ LANGUAGE plpgsql;
 
---Ajouter un prerequis
-CREATE OR REPLACE FUNCTION projet.ajouter_prerequis(int, int) RETURNS VOID AS $$
+-- TODO Ajouter un prerequis
+CREATE OR REPLACE FUNCTION projet.ajouter_prerequis(varchar, varchar) RETURNS VOID AS $$
     DECLARE
-        id_prerequise ALIAS FOR $1;
-        id_requise ALIAS FOR $2;
+        code_qui_requiert ALIAS FOR $1;
+        code_requise ALIAS FOR $2;
     BEGIN
-        INSERT INTO projet.prerequis VALUES
-         (id_prerequise, id_requise);
+        INSERT INTO projet.prerequis (ue_qui_requiert, ue_requise)
+        SELECT ue_requise.id_ue, ue_requiert.id_ue
+        FROM projet.unites_enseignement ue_requise, projet.unites_enseignement ue_requiert
+        WHERE ue_requise.code = code_requise
+        AND ue_requiert.code = code_qui_requiert;
     END;
 $$ LANGUAGE plpgsql;
-
+-- TODO ajouter_prerequis() n'existe pas
 CREATE TRIGGER trigger_verifier_prerequis BEFORE INSERT ON projet.prerequis
-    FOR EACH ROW EXECUTE PROCEDURE projet.verifie_add_prerequis();
+    FOR EACH ROW EXECUTE PROCEDURE projet.ajouter_prerequis();
 
 --Ajouter un etudiant
 CREATE OR REPLACE FUNCTION projet.ajouter_etudiant(varchar,varchar,varchar,varchar) RETURNS VOID AS $$
@@ -280,13 +263,16 @@ CREATE OR REPLACE FUNCTION projet.ajouter_etudiant(varchar,varchar,varchar,varch
 $$LANGUAGE plpgsql;
 
 --Ajouter une UE validee pour un etudiant
-CREATE OR REPLACE FUNCTION projet.ajouter_acquis(int,int) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION projet.ajouter_acquis(varchar,varchar) RETURNS VOID AS $$
     DECLARE
-        id_etudiant ALIAS FOR $1;
-        id_ue ALIAS FOR $2;
+        email_etudiant ALIAS FOR $1;
+        code_ue ALIAS FOR $2;
     BEGIN
-        INSERT INTO projet.acquis VALUES
-            (id_etudiant, id_ue);
+        INSERT INTO projet.acquis
+		SELECT e.numero_etudiant, ue.id_ue
+		FROM projet.etudiants e, projet.unites_enseignement ue
+		WHERE e.email = email_etudiant
+		AND ue.code = code_ue;
     END;
 $$LANGUAGE plpgsql;
 
@@ -297,7 +283,7 @@ CREATE VIEW projet.afficher_etudiant_bloc AS
     WHERE p.etudiant = e.numero_etudiant
     ORDER BY e.nom;
 
-SELECT nom,prenom,nbr_credit_total FROM projet.afficher_etudiant_bloc WHERE "Numero Bloc" = ?;
+--SELECT nom,prenom,nbr_credit_total FROM projet.afficher_etudiant_bloc WHERE "Numero Bloc" = ?;
 
 --Afficher le nombre de credit du PAE pour un etudiant
 CREATE VIEW projet.afficher_tout_etudiant AS
@@ -306,7 +292,7 @@ CREATE VIEW projet.afficher_tout_etudiant AS
     WHERE e.numero_etudiant = p.etudiant
     ORDER BY p.nbr_credit_total;
 
-SELECT * FROM projet.afficher_tout_etudiant;
+--SELECT * FROM projet.afficher_tout_etudiant;
 
 --Afficher tout les etudiant dont le PEA n'est pas valider
 CREATE VIEW projet.afficher_etudiant_pae_non_valide AS
@@ -315,7 +301,7 @@ CREATE VIEW projet.afficher_etudiant_pae_non_valide AS
     WHERE e.numero_etudiant = p.etudiant AND
           p.est_valide = FALSE;
 
-SELECT * FROM projet.afficher_etudiant_pae_non_valide;
+--SELECT * FROM projet.afficher_etudiant_pae_non_valide;
 
 --Afficher toutes les UE d'un bloc
 CREATE VIEW projet.afficher_ue_bloc AS
@@ -323,7 +309,7 @@ CREATE VIEW projet.afficher_ue_bloc AS
     FROM projet.unites_enseignement ue
     ORDER BY ue.nbr_inscrit;
 
-SELECT * FROM projet.afficher_ue_bloc WHERE "Numero Bloc" = ?;
+--SELECT * FROM projet.afficher_ue_bloc WHERE "Numero Bloc" = ?;
 
 
 -------------------Application etudiant
@@ -338,9 +324,8 @@ CREATE OR REPLACE FUNCTION projet.ajouter_ue_pae(int,int) RETURNS VOID AS $$
             (ue_ajouter,etud);
     END;
 $$LANGUAGE plpgsql;
-
-CREATE TRIGGER trigger_ajoute_ue_pae BEFORE INSERT ON projet.pae_ue
-    FOR EACH ROW EXECUTE PROCEDURE projet.verifie_ajouter_ue_pae();
+--TODO
+CREATE TRIGGER trigger_
 
 --Enlever une UE a son PAE
 CREATE OR REPLACE FUNCTION projet.retirer_ue_pae(int,int) RETURNS VOID AS $$
@@ -354,8 +339,6 @@ CREATE OR REPLACE FUNCTION projet.retirer_ue_pae(int,int) RETURNS VOID AS $$
     END;
 $$LANGUAGE plpgsql;
 
---CREATE TRIGGER
-
 --Valider son PAE
 CREATE OR REPLACE FUNCTION projet.valider_pae(int) RETURNS VOID AS $$
     DECLARE
@@ -367,7 +350,7 @@ CREATE OR REPLACE FUNCTION projet.valider_pae(int) RETURNS VOID AS $$
     END;
 $$LANGUAGE plpgsql;
 
---Afficher les UE auxquelles un etudiant peut s'inscrire
+--TODO Afficher les UE auxquelles un etudiant peut s'inscrire
 CREATE VIEW projet.afficher_ue_inscrivable AS
     SELECT UE.code, UE.nom, UE.nbr_credit, UE.numero_bloc
     FROM projet.unites_enseignement UE, projet.etudiants e
@@ -393,8 +376,7 @@ CREATE VIEW projet.afficher_ue_inscrivable AS
                 WHERE ue2.numero_bloc > 1 AND
                       e.nbr_credit_valide < 30
           );
-SELECT * FROM projet.afficher_ue_inscrivable
-WHERE 'Numero Etudiant' = ?;
+-- SELECT * FROM projet.afficher_ue_inscrivable WHERE 'Numero Etudiant' = ?;
 
 --Afficher son PAE
 CREATE VIEW projet.afficher_pae AS
