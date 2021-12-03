@@ -295,7 +295,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trigger_verifier_prerequis BEFORE INSERT ON projet.prerequis
     FOR EACH ROW EXECUTE PROCEDURE projet.verifie_ajouter_prerequis();
 
---Ajouter un etudiant
+--Ajouter un etudiant TODO creer un PAE pour cette etudiant en même temps
 CREATE OR REPLACE FUNCTION projet.ajouter_etudiant(varchar,varchar,varchar,varchar) RETURNS VOID AS $$
     DECLARE
         et_nom ALIAS FOR $1;
