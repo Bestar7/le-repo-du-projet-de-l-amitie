@@ -64,6 +64,7 @@ public class ChoiceHandler {
 
         try {
         	ueAjout.setString(1, code);
+        	ueAjout.setInt(2, numeroUser);
         	
         	ueAjout.executeQuery();
         } catch (SQLException e) {
@@ -77,6 +78,7 @@ public class ChoiceHandler {
 
         try {
         	ueRetrait.setString(1, code);
+        	ueRetrait.setInt(2, numeroUser);
         	
         	ueRetrait.executeQuery();
         } catch (SQLException e) {
@@ -86,6 +88,8 @@ public class ChoiceHandler {
     private PreparedStatement validation; //3.TODO ajouter le num de l'etudiant � la requ�te
     public void validerPae() {
         try {
+        	validation.setInt(1, numeroUser);
+        	
         	validation.executeQuery();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -94,6 +98,8 @@ public class ChoiceHandler {
     private PreparedStatement ueDispo; //4.TODO ajouter le num de l'etudiant � la requ�te
     public void afficherUeDispo() {
         try {
+        	ueDispo.setInt(1, numeroUser);
+        	
         	try (ResultSet rs = ueDispo.executeQuery()) {
                 while (rs.next()) {
                     System.out.println("  "+rs.getString("code")+" "+
@@ -108,6 +114,8 @@ public class ChoiceHandler {
     public void visualiserPae() {
         System.out.println("numero du bloc : ");
         try {
+        	visuPae.setInt(1, numeroUser);
+        	
             try (ResultSet rs = visuPae.executeQuery()) {
                 while (rs.next()) {
                     System.out.println("  "+rs.getString("code")+" "+
@@ -124,25 +132,6 @@ public class ChoiceHandler {
         	reinitPae.executeQuery();
         } catch (SQLException e) {
             e.printStackTrace();
-        }
-    }
-
-    public void test() {
-    	try {
-        	PreparedStatement ps = conn.prepareStatement(
-        			"SELECT *\n"
-        			+ "FROM projet.etudiants e");
-        	try (ResultSet rs = ps.executeQuery()) {
-        		while (rs.next()) {
-                    System.out.println("  "+rs.getInt("numero_etudiant")+" "+
-                            rs.getString("nom")+" "+rs.getString("prenom")+" "+
-                            rs.getString("email"));
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Erreur avec les requ�tes SQL !");
-            close();
-            System.exit(1);
         }
     }
     

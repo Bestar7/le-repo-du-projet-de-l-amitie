@@ -21,7 +21,7 @@ public class DB {
     }
 
     private void setConnexion(String user, String mdp) {
-    	String url = /*"jdbc:postgresql://localhost:5432/Projet 2021";*/"jdbc:postgresql://172.24.2.6:5432/dbjoachimbastin";
+    	String url = "jdbc:postgresql://localhost:5432/Projet 2021";//"jdbc:postgresql://172.24.2.6:5432/dbjoachimbastin";
         try {
             conn = DriverManager.getConnection(url, user, mdp);
         } catch (SQLException e) {

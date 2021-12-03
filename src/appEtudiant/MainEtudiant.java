@@ -14,7 +14,6 @@ public class MainEtudiant {
 		"visualiser les différentes UE dsiponible pour votre PAE",
 		"Visualiser votre PAE",
 		"Réinitialiser votre PAE",
-		"TEST supp : OPTIONS, choicesEtudiant, test()"
 	};
 
 
@@ -88,9 +87,6 @@ public class MainEtudiant {
 			break;
 		case 6:
 			ch.reinitialiserPae();
-			break;
-		case 7:
-			ch.test();
 			break;
 		default:
 			ch.close();
