@@ -115,7 +115,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trigger_count_nbr_credit_total AFTER INSERT ON projet.paes
     FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_credit_total();
 
---validation du pae
+-- TODO validation du pae
 CREATE OR REPLACE FUNCTION projet.update_validation(etudiant_num INTEGER) RETURNS TRIGGER AS $$
 DECLARE
     credit_total_valide int;
@@ -232,7 +232,7 @@ CREATE OR REPLACE FUNCTION projet.ajouter_ue(varchar,varchar,int,int) RETURNS VO
     END;
 $$ LANGUAGE plpgsql;
 
---Ajouter un prerequis
+-- TODO Ajouter un prerequis
 CREATE OR REPLACE FUNCTION projet.ajouter_prerequis(varchar, varchar) RETURNS VOID AS $$
     DECLARE
         code_qui_requiert ALIAS FOR $1;
@@ -245,7 +245,7 @@ CREATE OR REPLACE FUNCTION projet.ajouter_prerequis(varchar, varchar) RETURNS VO
         AND ue_requiert.code = code_qui_requiert;
     END;
 $$ LANGUAGE plpgsql;
-
+-- TODO ajouter_prerequis() n'existe pas
 CREATE TRIGGER trigger_verifier_prerequis BEFORE INSERT ON projet.prerequis
     FOR EACH ROW EXECUTE PROCEDURE projet.ajouter_prerequis();
 
@@ -283,7 +283,7 @@ CREATE VIEW projet.afficher_etudiant_bloc AS
     WHERE p.etudiant = e.numero_etudiant
     ORDER BY e.nom;
 
-SELECT nom,prenom,nbr_credit_total FROM projet.afficher_etudiant_bloc WHERE "Numero Bloc" = ?;
+--SELECT nom,prenom,nbr_credit_total FROM projet.afficher_etudiant_bloc WHERE "Numero Bloc" = ?;
 
 --Afficher le nombre de credit du PAE pour un etudiant
 CREATE VIEW projet.afficher_tout_etudiant AS
@@ -292,7 +292,7 @@ CREATE VIEW projet.afficher_tout_etudiant AS
     WHERE e.numero_etudiant = p.etudiant
     ORDER BY p.nbr_credit_total;
 
-SELECT * FROM projet.afficher_tout_etudiant;
+--SELECT * FROM projet.afficher_tout_etudiant;
 
 --Afficher tout les etudiant dont le PEA n'est pas valider
 CREATE VIEW projet.afficher_etudiant_pae_non_valide AS
@@ -301,7 +301,7 @@ CREATE VIEW projet.afficher_etudiant_pae_non_valide AS
     WHERE e.numero_etudiant = p.etudiant AND
           p.est_valide = FALSE;
 
-SELECT * FROM projet.afficher_etudiant_pae_non_valide;
+--SELECT * FROM projet.afficher_etudiant_pae_non_valide;
 
 --Afficher toutes les UE d'un bloc
 CREATE VIEW projet.afficher_ue_bloc AS
@@ -309,7 +309,7 @@ CREATE VIEW projet.afficher_ue_bloc AS
     FROM projet.unites_enseignement ue
     ORDER BY ue.nbr_inscrit;
 
-SELECT * FROM projet.afficher_ue_bloc WHERE "Numero Bloc" = ?;
+--SELECT * FROM projet.afficher_ue_bloc WHERE "Numero Bloc" = ?;
 
 
 -------------------Application etudiant
@@ -324,7 +324,7 @@ CREATE OR REPLACE FUNCTION projet.ajouter_ue_pae(int,int) RETURNS VOID AS $$
             (ue_ajouter,etud);
     END;
 $$LANGUAGE plpgsql;
-
+--TODO
 CREATE TRIGGER trigger_
 
 --Enlever une UE a son PAE
@@ -350,7 +350,7 @@ CREATE OR REPLACE FUNCTION projet.valider_pae(int) RETURNS VOID AS $$
     END;
 $$LANGUAGE plpgsql;
 
---Afficher les UE auxquelles un etudiant peut s'inscrire
+--TODO Afficher les UE auxquelles un etudiant peut s'inscrire
 CREATE VIEW projet.afficher_ue_inscrivable AS
     SELECT UE.code, UE.nom, UE.nbr_credit, UE.numero_bloc
     FROM projet.unites_enseignement UE, projet.etudiants e
@@ -376,8 +376,7 @@ CREATE VIEW projet.afficher_ue_inscrivable AS
                 WHERE ue2.numero_bloc > 1 AND
                       e.nbr_credit_valide < 30
           );
-SELECT * FROM projet.afficher_ue_inscrivable
-WHERE 'Numero Etudiant' = ?;
+-- SELECT * FROM projet.afficher_ue_inscrivable WHERE 'Numero Etudiant' = ?;
 
 --Afficher son PAE
 CREATE VIEW projet.afficher_pae AS
