@@ -99,7 +99,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
---nbr_credit_total TODO verifier cela (return NEW ?) && WHERE etudiant = pu.etudiant ???
+--nbr_credit_total TODO verifier cela (return NEW ?) && WHERE etudiant = pu.etudiant ??? cela empêchait d'ajouter un PAE à un étudiant
 CREATE OR REPLACE FUNCTION projet.update_nbr_credit_total() RETURNS TRIGGER AS $$
 DECLARE
     ue_record RECORD;
@@ -117,8 +117,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
---TODO ce trigger (ou la fonction update_nbr_credit_total) empêche
---(pas de creation automatique de PAE pour l'étudiant lors de son insert)
+-- TODO pas de creation automatique de PAE pour l'étudiant lors de son insert
 CREATE TRIGGER trigger_count_nbr_credit_total AFTER INSERT ON projet.paes
     FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_credit_total();
 
