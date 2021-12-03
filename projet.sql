@@ -241,6 +241,17 @@ CREATE OR REPLACE FUNCTION projet.verifie_ajouter_pae_ue() RETURNS TRIGGER AS $$
     END;
 $$LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION projet.verifie_retirer_pae_ue() RETURNS TRIGGER AS $$
+    DECLARE
+
+    BEGIN
+        IF(SELECT p.est_valide FROM projet.paes p WHERE etudiant = OLD.etudiant)THEN
+            RAISE'PAE déjà validé';
+        end if;
+        RETURN OLD;
+    end;
+$$LANGUAGE plpgsql;
+
 
 
 
@@ -351,12 +362,12 @@ CREATE OR REPLACE FUNCTION projet.ajouter_ue_pae(ue_code int,id_etud int) RETURN
             (ue_ajouter,etud);
     END;
 $$LANGUAGE plpgsql;
---TODO
+
 CREATE TRIGGER trigger_verifier_ajouter_ue_pae BEFORE INSERT ON projet.pae_ue
     FOR EACH ROW EXECUTE PROCEDURE projet.verifie_ajouter_pae_ue();
 
 --Enlever une UE a son PAE
-CREATE OR REPLACE FUNCTION projet.retirer_ue_pae(int,int) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION projet.retirer_ue_pae(ue_retirer int,etudiant int) RETURNS VOID AS $$
     DECLARE
         ue_retirer ALIAS FOR $1;
         etud ALIAS FOR $2;
@@ -366,6 +377,9 @@ CREATE OR REPLACE FUNCTION projet.retirer_ue_pae(int,int) RETURNS VOID AS $$
               pu.ue = ue_retirer;
     END;
 $$LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_verifie_retirer_ue_pae BEFORE DELETE ON projet.pae_ue
+    FOR EACH ROW EXECUTE PROCEDURE projet.verifie_retirer_pae_ue();
 
 --Valider son PAE
 CREATE OR REPLACE FUNCTION projet.valider_pae(int) RETURNS VOID AS $$
