@@ -117,6 +117,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+--TODO ce trigger (ou la fonction update_nbr_credit_total) empêche
+--(pas de creation automatique de PAE pour l'étudiant lors de son insert)
 CREATE TRIGGER trigger_count_nbr_credit_total AFTER INSERT ON projet.paes
     FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_credit_total();
 
