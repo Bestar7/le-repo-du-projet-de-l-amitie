@@ -99,16 +99,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 
---nbr_credit_total
+--nbr_credit_total TODO verifier cela (return NEW ?) && WHERE etudiant = pu.etudiant ???
 CREATE OR REPLACE FUNCTION projet.update_nbr_credit_total() RETURNS TRIGGER AS $$
 DECLARE
-    ue RECORD;
+    ue_record RECORD;
 BEGIN
-    FOR ue IN SELECT ue.* FROM projet.pae_ue pu, projet.paes p, projet.unites_enseignement ue
-    WHERE pu.etudiant = p.etudiant AND pu.ue = ue.code LOOP
+    FOR ue_record IN SELECT ue.*
+	FROM projet.pae_ue pu, projet.paes p, projet.unites_enseignement ue
+    WHERE pu.etudiant = p.etudiant 
+	AND pu.ue = ue.id_ue
+	LOOP
         UPDATE projet.paes
-        SET nbr_credit_total = nbr_credit_total + ue.nbr_credit;
+        SET nbr_credit_total = nbr_credit_total + ue.nbr_credit
+		WHERE etudiant = pu.etudiant;
     END LOOP;
+	RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
