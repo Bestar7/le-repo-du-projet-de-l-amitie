@@ -297,7 +297,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trigger_verifier_prerequis BEFORE INSERT ON projet.prerequis
     FOR EACH ROW EXECUTE PROCEDURE projet.verifie_ajouter_prerequis();
 
---Ajouter un etudiant TODO creer un PAE pour cette etudiant en même temps
+--Ajouter un etudiant
 CREATE OR REPLACE FUNCTION projet.ajouter_etudiant(varchar,varchar,varchar,varchar) RETURNS VOID AS $$
     DECLARE
         et_nom ALIAS FOR $1;
@@ -309,6 +309,20 @@ CREATE OR REPLACE FUNCTION projet.ajouter_etudiant(varchar,varchar,varchar,varch
             (DEFAULT, et_nom, et_prenom, et_email, et_mdp, 0, NULL);
     END;
 $$LANGUAGE plpgsql;
+
+-- creer un pae après avoir ajouté l'etudiant
+CREATE OR REPLACE FUNCTION projet.create_pae() RETURNS TRIGGER AS $$
+DECLARE
+    ue RECORD;
+BEGIN
+	INSERT INTO projet.paes (etudiant)
+			SELECT seq.last_value
+			FROM projet.seq_etudiant seq;
+	RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+CREATE TRIGGER trigger_count_nbr_inscrit AFTER INSERT ON projet.etudiants
+    FOR EACH ROW EXECUTE PROCEDURE projet.create_pae();
 
 --Ajouter une UE validee pour un etudiant
 CREATE OR REPLACE FUNCTION projet.ajouter_acquis(varchar,varchar) RETURNS VOID AS $$
