@@ -101,8 +101,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trigger_count_nbr_inscrit AFTER UPDATE OF est_valide ON projet.paes
-    FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_inscrit();
 
 --nbr_credit_total
 CREATE OR REPLACE FUNCTION projet.update_nbr_credit_total() RETURNS TRIGGER AS $$
@@ -181,8 +179,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trigger_valider_pae BEFORE UPDATE OF est_valide ON projet.paes
-    FOR EACH ROW EXECUTE PROCEDURE projet.update_validation();
+
 
 
 --nbr_credit_valide
@@ -217,7 +214,6 @@ DECLARE
         RETURN NEW;
     END;
 $$ LANGUAGE plpgsql;
-
 
 
 CREATE OR REPLACE FUNCTION projet.verifie_ajouter_pae_ue() RETURNS TRIGGER AS $$
@@ -382,15 +378,22 @@ CREATE TRIGGER trigger_verifie_retirer_ue_pae BEFORE DELETE ON projet.pae_ue
     FOR EACH ROW EXECUTE PROCEDURE projet.verifie_retirer_pae_ue();
 
 --Valider son PAE
-CREATE OR REPLACE FUNCTION projet.valider_pae(int) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION projet.valider_pae(num_etudiant varchar) RETURNS VOID AS $$
     DECLARE
         num_etud ALIAS FOR $1;
     BEGIN
-       UPDATE projet.paes p
+        UPDATE projet.paes p
         SET est_valide = TRUE
         WHERE p.etudiant = num_etud;
     END;
 $$LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_valider_pae BEFORE UPDATE OF est_valide ON projet.paes
+    FOR EACH ROW EXECUTE PROCEDURE projet.update_validation();
+
+CREATE TRIGGER trigger_count_nbr_inscrit AFTER UPDATE OF est_valide ON projet.paes
+    FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_inscrit();
+
 
 --TODO Afficher les UE auxquelles un etudiant peut s'inscrire
 CREATE VIEW projet.afficher_ue_inscrivable AS
