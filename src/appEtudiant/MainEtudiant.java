@@ -6,64 +6,6 @@ import connection.DB;
 
 public class MainEtudiant {
 	private static Scanner scanner = new Scanner(System.in);
-
-	
-	// TODO : demander si requête pour num_etudiant lors de la connexion de l'etudiant
-	// TODO : Faire des transaction, pour gerer l'utilisation de plusieurs utilisateur à la DB
-	/*
-	CREATE USER un_email WITH PASSWORD 'un mdp';
-	GRANT CONNECT ON DATABASE "Projet 2021" TO joachimbastin;
-	GRANT USAGE ON SCHEMA projet TO joachimbastin;
-	GRANT SELECT ON projet.acquis, projet.blocs, projet.etudiants, projet.pae_ue, 
-	projet.paes, projet.prerequis, projet.unites_enseignement TO joachimbastin ;
-	*/
-	// puis email = le nom d'urilisateur
-	
-	
-	/*
-	CREATE OR REPLACE FUNCTION projet.grant_to_student() RETURNS TRIGGER AS $$
-	DECLARE
-	    email varchar;
-		mdp varchar;
-	BEGIN
-		SELECT NEW.email INTO email;
-		SELECT NEW.mdp INTO email;
-		
-	    CREATE USER email WITH PASSWORD mdp;
-		GRANT CONNECT ON DATABASE "Projet 2021" TO email;
-		GRANT USAGE ON SCHEMA projet TO email;
-		GRANT SELECT ON 
-		projet.acquis, projet.blocs, projet.etudiants, 
-		projet.pae_ue, projet.paes, projet.prerequis, 
-		projet.unites_enseignement TO email ;
-		RETURN NEW
-	END;
-	$$ LANGUAGE plpgsql;
-	*/
-	
-	/*
-	CREATE OR REPLACE FUNCTION projet.create_user()
-	RETURNS TRIGGER AS $$
-	DECLARE
-	BEGIN
-		EXECUTE FORMAT('CREATE USER "%I" WITH PASSWORD ''%L'';', NEW.email, NEW.mdp);
-		EXECUTE FORMAT('GRANT CONNECT ON DATABASE "Projet 2021" TO "%I";', NEW.email);
-	    EXECUTE FORMAT('GRANT USAGE ON SCHEMA projet TO "%I";', NEW.email);
-		EXECUTE FORMAT(
-			'GRANT SELECT ON 
-			projet.acquis, projet.blocs, projet.etudiants, 
-			projet.pae_ue, projet.paes, projet.prerequis, 
-			projet.unites_enseignement TO "%I" ;',NEW.email
-			);
-			
-			--EXECUTE FORMAT('CREATE ROLE "%I" LOGIN PASSWORD ''%L''', v_username, v_password);
-	    RETURN NULL;
-	END;
-	$$ LANGUAGE plpgsql-- STRICT VOLATILE SECURITY DEFINER COST 100;
-	--ALTER FUNCTION public.create_databaseuser(NAME, TEXT) OWNER TO postgres;
-	CREATE TRIGGER trigger_create_user AFTER UPDATE ON projet.etudiants
-	    FOR EACH STATEMENT EXECUTE PROCEDURE projet.create_user();
-    */
 	
 	private static final String[] OPTIONS = new String[] {
 		"ajouter une UE à votre PAE",
@@ -77,13 +19,15 @@ public class MainEtudiant {
 
 
 	public MainEtudiant(){
+		DB db = new DB("tanguyraskin","67DTB.!?8H0" ); // joachimbastin IQXR6CLVW
+
 		System.out.println("Veuillez entrer votre email");
 		String user = scanner.nextLine();
 		System.out.println("Veuillez entrer votre mot de passe");
 		String mdp = scanner.nextLine();
 
-		DB db = new DB(user, mdp);
-		ChoiceHandler ch = new ChoiceHandler(db, user);
+
+		ChoiceHandler ch = new ChoiceHandler(db, user, mdp);
 
 		while (true) {
 			printChoicesEtudiant();
