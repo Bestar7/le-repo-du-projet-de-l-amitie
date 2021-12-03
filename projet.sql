@@ -339,13 +339,15 @@ CREATE VIEW projet.afficher_ue_bloc AS
 -------------------Application etudiant
 
 --Ajouter une UE a son PAE
-CREATE OR REPLACE FUNCTION projet.ajouter_ue_pae(ue_code int,id_etud int) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION projet.ajouter_ue_pae(code_ue_ajouter varchar,id_etud int) RETURNS VOID AS $$
     DECLARE
-        ue_ajouter ALIAS FOR $1;
-        etud ALIAS FOR $2;
+        code_ue_ajouter ALIAS FOR $1;
+        id_etud ALIAS FOR $2;
     BEGIN
-        INSERT INTO projet.pae_ue VALUES
-            (ue_ajouter,etud);
+        INSERT INTO projet.pae_ue
+        SELECT ue.id_ue, id_etud
+        FROM projet.unites_enseignement ue
+        WHERE ue.code = code_ue_ajouter;
     END;
 $$LANGUAGE plpgsql;
 --TODO
