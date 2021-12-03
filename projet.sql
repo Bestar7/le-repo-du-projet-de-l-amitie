@@ -355,14 +355,17 @@ CREATE TRIGGER trigger_verifier_ajouter_ue_pae BEFORE INSERT ON projet.pae_ue
     FOR EACH ROW EXECUTE PROCEDURE projet.verifie_ajouter_pae_ue();
 
 --Enlever une UE a son PAE
-CREATE OR REPLACE FUNCTION projet.retirer_ue_pae(int,int) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION projet.retirer_ue_pae(code_ue_retirer varchar, id_etud int) RETURNS VOID AS $$
     DECLARE
-        ue_retirer ALIAS FOR $1;
-        etud ALIAS FOR $2;
+        code_ue_retirer ALIAS FOR $1;
+        id_etud ALIAS FOR $2;
     BEGIN
-       DELETE FROM projet.pae_ue pu
-        WHERE pu.etudiant = etud AND
-              pu.ue = ue_retirer;
+        DELETE FROM projet.pae_ue pu
+        WHERE pu.etudiant = id_etud
+        AND pu.ue = (
+            SELECT *
+            FROM projet.unites_enseignement ue
+            WHERE ue.code = code_ue_retirer);
     END;
 $$LANGUAGE plpgsql;
 
