@@ -5,8 +5,9 @@ CREATE TABLE projet.blocs (
     numero_bloc int PRIMARY KEY CHECK (numero_bloc>=1 AND numero_bloc <=3)
 );
 
+CREATE SEQUENCE projet.seq_etudiant;
 CREATE TABLE projet.etudiants (
-    numero_etudiant SERIAL PRIMARY KEY,
+    numero_etudiant INT NOT NULL DEFAULT nextval('projet.seq_etudiant') PRIMARY KEY,
     nom             varchar(100) NOT NULL CHECK (nom<>''),
     prenom          varchar(100) NOT NULL CHECK (prenom<>''),
     email           varchar(100) NOT NULL CHECK (email SIMILAR TO '%@%.%') unique,
@@ -17,6 +18,7 @@ CREATE TABLE projet.etudiants (
     CONSTRAINT bloc_etudiant_fkey FOREIGN KEY(numero_bloc)
         REFERENCES projet.blocs(numero_bloc)
 );
+ALTER SEQUENCE projet.seq_etudiant OWNED BY projet.etudiants.numero_etudiant;
 
 CREATE TABLE projet.unites_enseignement (
     id_ue       SERIAL PRIMARY KEY,
