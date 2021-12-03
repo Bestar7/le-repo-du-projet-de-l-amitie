@@ -12,30 +12,30 @@ public class ChoiceHandler {
 	private static Scanner scanner = new Scanner(System.in);
 	
 	private String emailUser;
-	private int numeroUser; // TODO le mettre ou pas ???
+	private int numeroUser;
 	
     
     private Connection conn;
-    public ChoiceHandler(DB db, String emailUser){
+    public ChoiceHandler(DB db, String emailUser, String mdp){
         conn = db.getConnection();
         this.emailUser = emailUser;
-        
-        /*
+
         try {
         	PreparedStatement ps = conn.prepareStatement("SELECT *\n"
         			+ "FROM projet.etudiants e\n"
-        			+ "WHERE e.email = ?");
+        			+ "WHERE e.email = ?"
+                    + "AND e.mdp = ?");
         	ps.setString(1, emailUser);
+        	ps.setString(2, mdp);
         	try (ResultSet rs = ps.executeQuery()) {
         		rs.next();
         		numeroUser = rs.getInt("numero_etudiant");
             }
         } catch (SQLException e) {
-            System.out.println("Erreur avec les requêtes SQL !");
+            System.out.println("Erreur avec les requÃªtes SQL !");
             close();
             System.exit(1);
         }
-        */
 
         try {
         	//1.
@@ -51,13 +51,13 @@ public class ChoiceHandler {
             //6.
             reinitPae = conn.prepareStatement("SELECT projet.reinitialiser_pae(?);");
         } catch (SQLException e) {
-            System.out.println("Erreur avec les requêtes SQL !");
+            System.out.println("Erreur avec les requï¿½tes SQL !");
             close();
             System.exit(1);
         }
     }
     
-    private PreparedStatement ueAjout; //1.TODO ajouter le num de l'etudiant à la requête
+    private PreparedStatement ueAjout; //1.TODO ajouter le num de l'etudiant ï¿½ la requï¿½te
     public void ajouterUeAuPae() {
     	System.out.println("code de l'UE que vous voulez ajouter au PAE  : ");
         String code = scanner.nextLine();
@@ -70,7 +70,7 @@ public class ChoiceHandler {
             e.printStackTrace();
         }
     }
-    private PreparedStatement ueRetrait; //2.TODO ajouter le num de l'etudiant à la requête
+    private PreparedStatement ueRetrait; //2.TODO ajouter le num de l'etudiant ï¿½ la requï¿½te
     public void retirerUeDuPae() {
     	System.out.println("code de l'UE que vous voulez enlever du PAE  : ");
         String code = scanner.nextLine();
@@ -83,7 +83,7 @@ public class ChoiceHandler {
             e.printStackTrace();
         }
     }
-    private PreparedStatement validation; //3.TODO ajouter le num de l'etudiant à la requête
+    private PreparedStatement validation; //3.TODO ajouter le num de l'etudiant ï¿½ la requï¿½te
     public void validerPae() {
         try {
         	validation.executeQuery();
@@ -91,7 +91,7 @@ public class ChoiceHandler {
             e.printStackTrace();
         }
     }
-    private PreparedStatement ueDispo; //4.TODO ajouter le num de l'etudiant à la requête
+    private PreparedStatement ueDispo; //4.TODO ajouter le num de l'etudiant ï¿½ la requï¿½te
     public void afficherUeDispo() {
         try {
         	try (ResultSet rs = ueDispo.executeQuery()) {
@@ -104,7 +104,7 @@ public class ChoiceHandler {
             e.printStackTrace();
         }
     }
-    private PreparedStatement visuPae; //5.TODO ajouter le num de l'etudiant à la requête
+    private PreparedStatement visuPae; //5.TODO ajouter le num de l'etudiant ï¿½ la requï¿½te
     public void visualiserPae() {
         System.out.println("numero du bloc : ");
         try {
@@ -118,7 +118,7 @@ public class ChoiceHandler {
             e.printStackTrace();
         }
     }
-    private PreparedStatement reinitPae; //6.TODO ajouter le num de l'etudiant à la requête
+    private PreparedStatement reinitPae; //6.TODO ajouter le num de l'etudiant ï¿½ la requï¿½te
     public void reinitialiserPae() {
         try {
         	reinitPae.executeQuery();
@@ -140,7 +140,7 @@ public class ChoiceHandler {
                 }
             }
         } catch (SQLException e) {
-            System.out.println("Erreur avec les requêtes SQL !");
+            System.out.println("Erreur avec les requï¿½tes SQL !");
             close();
             System.exit(1);
         }
