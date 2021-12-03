@@ -73,7 +73,12 @@ CREATE TABLE projet.pae_ue (
 );
 
 
+----------------------------------USAGE
 
+GRANT USAGE ON SCHEMA projet TO tanguyraskin;
+GRANT SELECT ON projet.prerequis, projet.acquis,
+    projet.paes, projet.unites_enseignement, projet.pae_ue,
+    projet.etudiants, projet.blocs, projet.pae_ue TO tanguyraskin;
 
 
 
@@ -115,26 +120,26 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trigger_count_nbr_credit_total AFTER INSERT ON projet.paes
     FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_credit_total();
 
--- TODO validation du pae
-CREATE OR REPLACE FUNCTION projet.update_validation(etudiant_num INTEGER) RETURNS TRIGGER AS $$
+--validation du pae
+CREATE OR REPLACE FUNCTION projet.update_validation() RETURNS TRIGGER AS $$
 DECLARE
     credit_total_valide int;
     credit_total_pae int;
     bloc int;
 BEGIN
     --pas deja valide
-    IF(SELECT p.est_valide FROM projet.paes p WHERE p.etudiant = etudiant_num) THEN
+    IF(SELECT p.est_valide FROM projet.paes p WHERE p.etudiant = NEW.etudiant) THEN
         RAISE 'PAE deja valide';
-    end if;
+    END IF;
 
     --nombre credit deja valide
     SELECT e.nbr_credit_valide FROM projet.etudiants e
-    WHERE etudiant_num = e.numero_etudiant
+    WHERE NEW.etudiant = e.numero_etudiant
     INTO credit_total_valide;
 
     --nombre credit dans le pae
     SELECT p.nbr_credit_total FROM projet.paes p
-    WHERE etudiant_num = p.etudiant
+    WHERE NEW.etudiant = p.etudiant
     INTO credit_total_pae;
 
     --verification des conditions pour le nombre de credit total du pae
@@ -166,18 +171,18 @@ BEGIN
     --affectation du bloc a l'etudiant
     UPDATE projet.etudiants
     SET numero_bloc = bloc
-    WHERE numero_etudiant = etudiant_num;
+    WHERE numero_etudiant = NEW.etudiant;
 
     --validation du pae
     UPDATE projet.paes
     SET est_valide = TRUE
-    WHERE etudiant = etudiant_num;
+    WHERE etudiant = NEW.etudiant;
 
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trigger_valider_pae BEFORE UPDATE OF est_valide ON projet.paes
-    FOR EACH ROW EXECUTE PROCEDURE projet.update_validation(?);
+    FOR EACH ROW EXECUTE PROCEDURE projet.update_validation();
 
 
 --nbr_credit_valide
@@ -190,7 +195,6 @@ BEGIN
                             FROM projet.unites_enseignement ue
                             WHERE ue.code = NEW.ue)
     WHERE etudiants.numero_etudiant = NEW.etudiant;
-
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -200,19 +204,39 @@ FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_credit_valide();
 
 
 --ajoute d'un prerequis
-CREATE OR REPLACE FUNCTION projet.verifie_add_prerequis() RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION projet.verifie_ajouter_prerequis() RETURNS TRIGGER AS $$
 DECLARE
         ue_prereq RECORD;
         ue_req RECORD;
     BEGIN
-        SELECT ue.* FROM projet.unites_enseignement ue WHERE id_ue = NEW.id_prerequise INTO ue_prereq;
-        SELECT ue.* FROM projet.unites_enseignement ue WHERE id_ue = NEW.id_requise INTO ue_req;
+        SELECT ue.* FROM projet.unites_enseignement ue WHERE id_ue = NEW.ue_requise INTO ue_prereq;
+        SELECT ue.* FROM projet.unites_enseignement ue WHERE id_ue = NEW.ue_qui_requiert INTO ue_req;
         IF(ue_prereq.numero_bloc >= ue_req.numero_bloc) THEN
             RAISE 'Le bloc de l unite d enseignement doit etre inferieurs a celle requise';
         END IF;
-        RETURN NULL;
+        RETURN NEW;
     END;
 $$ LANGUAGE plpgsql;
+
+
+
+CREATE OR REPLACE FUNCTION projet.verifie_ajouter_pae_ue() RETURNS TRIGGER AS $$
+    DECLARE
+        ue_ajout record;
+        etud record;
+    BEGIN
+        SELECT ue.* FROM projet.unites_enseignement ue WHERE ue.id_ue = NEW.ue INTO ue_ajout;
+        SELECT p.* FROM projet.paes p  WHERE p.etudiant = NEW.etudiant INTO etud;
+
+        IF(etud.est_valide)then
+            RAISE'PAE déjà valide';
+        ELSIF(SELECT * FROM projet.acquis a WHERE a.etudiant =  etud.etudiant AND a.ue = ue_ajout.id_ue) then
+            RAISE'UE déjà acquise';
+        end if;
+
+        RETURN NEW;
+    END;
+$$LANGUAGE plpgsql;
 
 
 
@@ -220,7 +244,7 @@ $$ LANGUAGE plpgsql;
 -------------------Application centrale
 
 --Ajouter une UE
-CREATE OR REPLACE FUNCTION projet.ajouter_ue(varchar,varchar,int,int) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION projet.ajouter_ue(code_ue varchar,nom_ue varchar,nbr_credit int,num_bloc int) RETURNS VOID AS $$
     DECLARE
         ue_code ALIAS FOR $1;
         ue_nom ALIAS FOR $2;
@@ -232,8 +256,8 @@ CREATE OR REPLACE FUNCTION projet.ajouter_ue(varchar,varchar,int,int) RETURNS VO
     END;
 $$ LANGUAGE plpgsql;
 
--- TODO Ajouter un prerequis
-CREATE OR REPLACE FUNCTION projet.ajouter_prerequis(varchar, varchar) RETURNS VOID AS $$
+-- Ajouter un prerequis
+CREATE OR REPLACE FUNCTION projet.ajouter_prerequis(ue_qui_requiert varchar,ue_requise varchar) RETURNS VOID AS $$
     DECLARE
         code_qui_requiert ALIAS FOR $1;
         code_requise ALIAS FOR $2;
@@ -245,9 +269,9 @@ CREATE OR REPLACE FUNCTION projet.ajouter_prerequis(varchar, varchar) RETURNS VO
         AND ue_requiert.code = code_qui_requiert;
     END;
 $$ LANGUAGE plpgsql;
--- TODO ajouter_prerequis() n'existe pas
+
 CREATE TRIGGER trigger_verifier_prerequis BEFORE INSERT ON projet.prerequis
-    FOR EACH ROW EXECUTE PROCEDURE projet.ajouter_prerequis();
+    FOR EACH ROW EXECUTE PROCEDURE projet.verifie_ajouter_prerequis();
 
 --Ajouter un etudiant
 CREATE OR REPLACE FUNCTION projet.ajouter_etudiant(varchar,varchar,varchar,varchar) RETURNS VOID AS $$
@@ -315,7 +339,7 @@ CREATE VIEW projet.afficher_ue_bloc AS
 -------------------Application etudiant
 
 --Ajouter une UE a son PAE
-CREATE OR REPLACE FUNCTION projet.ajouter_ue_pae(int,int) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION projet.ajouter_ue_pae(ue_code int,id_etud int) RETURNS VOID AS $$
     DECLARE
         ue_ajouter ALIAS FOR $1;
         etud ALIAS FOR $2;
@@ -325,7 +349,8 @@ CREATE OR REPLACE FUNCTION projet.ajouter_ue_pae(int,int) RETURNS VOID AS $$
     END;
 $$LANGUAGE plpgsql;
 --TODO
-CREATE TRIGGER trigger_
+CREATE TRIGGER trigger_verifier_ajouter_ue_pae BEFORE INSERT ON projet.pae_ue
+    FOR EACH ROW EXECUTE PROCEDURE projet.verifie_ajouter_pae_ue();
 
 --Enlever une UE a son PAE
 CREATE OR REPLACE FUNCTION projet.retirer_ue_pae(int,int) RETURNS VOID AS $$
