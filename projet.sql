@@ -426,7 +426,7 @@ CREATE OR REPLACE FUNCTION projet.retirer_ue_pae(code_ue_retirer varchar, id_etu
         DELETE FROM projet.pae_ue pu
         WHERE pu.etudiant = id_etud
         AND pu.ue = (
-            SELECT *
+            SELECT ue.id_ue
             FROM projet.unites_enseignement ue
             WHERE ue.code = code_ue_retirer);
     END;
