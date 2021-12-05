@@ -436,7 +436,7 @@ CREATE TRIGGER trigger_verifie_retirer_ue_pae BEFORE DELETE ON projet.pae_ue
     FOR EACH ROW EXECUTE PROCEDURE projet.verifie_retirer_pae_ue();
 
 --Valider son PAE
-CREATE OR REPLACE FUNCTION projet.valider_pae(num_etudiant varchar) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION projet.valider_pae(num_etudiant int) RETURNS VOID AS $$
     DECLARE
         num_etud ALIAS FOR $1;
     BEGIN
