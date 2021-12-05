@@ -300,8 +300,11 @@ CREATE OR REPLACE FUNCTION projet.ajouter_ue(code_ue varchar,nom_ue varchar,nbr_
         ue_nbr_credit ALIAS FOR $3;
         num_bloc ALIAS FOR $4;
     BEGIN
+        IF (ue_code NOT LIKE 'BINV'||num_bloc||'%') THEN
+            RAISE 'mauvaise correspondance code - bloc';
+        END IF;
         INSERT INTO projet.unites_enseignement VALUES
-         (DEFAULT, ue_code, ue_nom, ue_nbr_credit, 0, num_bloc);
+        (DEFAULT, ue_code, ue_nom, ue_nbr_credit, 0, num_bloc);
     END;
 $$ LANGUAGE plpgsql;
 
