@@ -120,7 +120,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- TODO pas de creation automatique de PAE pour l'étudiant lors de son insert
-CREATE TRIGGER trigger_count_nbr_credit_total AFTER INSERT ON projet.paes
+CREATE TRIGGER trigger_count_nbr_credit_total AFTER INSERT ON projet.pae_ue
     FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_credit_total();
 
 --validation du pae
