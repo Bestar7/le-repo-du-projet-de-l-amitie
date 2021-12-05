@@ -145,21 +145,3 @@ INSERT INTO projet.acquis VALUES (12, 18);
 INSERT INTO projet.acquis VALUES (12, 19);
 INSERT INTO projet.acquis VALUES (12, 20);
 INSERT INTO projet.acquis VALUES (12, 21);
-
--- PAES 1e
-INSERT INTO projet.paes VALUES (1, DEFAULT, true);
-INSERT INTO projet.paes VALUES (2, DEFAULT, true);
-INSERT INTO projet.paes VALUES (3, DEFAULT, true);
-INSERT INTO projet.paes VALUES (4, DEFAULT, false);
-
--- PAES 2e
-INSERT INTO projet.paes VALUES (5, DEFAULT, false);
-INSERT INTO projet.paes VALUES (6, DEFAULT, false);
-INSERT INTO projet.paes VALUES (7, DEFAULT, false);
-INSERT INTO projet.paes VALUES (8, DEFAULT, false);
-
--- PAES 3e
-INSERT INTO projet.paes VALUES (9, DEFAULT, false);
-INSERT INTO projet.paes VALUES (10, DEFAULT, false);
-INSERT INTO projet.paes VALUES (11, DEFAULT, false);
-INSERT INTO projet.paes VALUES (12, DEFAULT, false);
