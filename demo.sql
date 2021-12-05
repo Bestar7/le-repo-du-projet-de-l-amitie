@@ -12,8 +12,8 @@ INSERT INTO projet.unites_enseignement VALUES (DEFAULT, 'BINV311', 'Anglais', 16
 INSERT INTO projet.unites_enseignement VALUES (DEFAULT, 'BINV32', 'Stage', 44, DEFAULT, 3);
 
 -- PREREQUIS
-INSERT INTO projet.prerequis VALUES (4,1);
-INSERT INTO projet.prerequis VALUES (6,4);
+INSERT INTO projet.prerequis (ue_qui_requiert, ue_requise) VALUES (4,1);
+INSERT INTO projet.prerequis (ue_qui_requiert, ue_requise) VALUES (6,4);
 
 -- ETUDIANT
 INSERT INTO projet.etudiants VALUES (DEFAULT, 'C.', 'Damas', 'damas@vinci.be', 'damas', DEFAULT, NULL);
