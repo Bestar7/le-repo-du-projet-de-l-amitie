@@ -230,20 +230,28 @@ CREATE OR REPLACE FUNCTION projet.verifie_ajouter_pae_ue() RETURNS TRIGGER AS $$
         SELECT p.* FROM projet.paes p  WHERE p.etudiant = NEW.etudiant INTO etud;
 
 	IF(etud.est_valide)then
-		RAISE'PAE déjà valide';
+		RAISE 'PAE déjà valide';
 	ELSIF EXISTS
 		(SELECT a1.*
 		FROM projet.acquis a1
 		WHERE a1.etudiant = etud.etudiant 
 		AND ue_ajout.id_ue = a1.ue)--IN 
 	THEN
-		RAISE'UE déjà acquise';
+		RAISE 'UE déjà acquise';
+	ELSIF
+		ue_ajout.numero_bloc <> 1
+		AND
+		(SELECT e.nbr_credit_valide 
+		FROM projet.etudiants e 
+		WHERE e.numero_etudiant = etud.etudiant) < 30
+	THEN
+		RAISE 'Vous ne pouvez avoir que des cours du bloc 1';
 	ELSIF EXISTS 
 		(SELECT p.ue_qui_requiert
 		FROM projet.prerequis p
 		WHERE p.ue_qui_requiert = ue_ajout.id_ue)
 	THEN
-		IF NOT EXISTS
+		IF EXISTS -- change this
 			(SELECT p.ue_requise 
 			FROM projet.prerequis p
 			WHERE p.ue_qui_requiert = ue_ajout.id_ue
@@ -254,16 +262,8 @@ CREATE OR REPLACE FUNCTION projet.verifie_ajouter_pae_ue() RETURNS TRIGGER AS $$
 		THEN
 			RAISE'Toutes les prerequis ne sont pas acquis'; -- pas ok mtn
 		END IF;
-	ELSIF
-		ue_ajout.numero_bloc <> 1
-		AND
-		(SELECT e.nbr_credit_valide 
-		FROM projet.etudiants e 
-		WHERE e.numero_etudiant = etud.etudiant) < 30 
-	THEN
-		RAISE'Vous ne pouvez avoir que des cours du bloc 1';
-        END IF;
-        RETURN NEW;
+	END IF;
+	RETURN NEW;
     END;
 $$LANGUAGE plpgsql;
 
