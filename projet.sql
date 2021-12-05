@@ -208,12 +208,12 @@ FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_credit_valide();
 --ajoute d'un prerequis
 CREATE OR REPLACE FUNCTION projet.verifie_ajouter_prerequis() RETURNS TRIGGER AS $$
 DECLARE
-        ue_prereq RECORD;
-        ue_req RECORD;
+        ue_requise1 RECORD;
+        ue_qui_requiert1 RECORD;
     BEGIN
-        SELECT ue.* FROM projet.unites_enseignement ue WHERE id_ue = NEW.ue_requise INTO ue_prereq;
-        SELECT ue.* FROM projet.unites_enseignement ue WHERE id_ue = NEW.ue_qui_requiert INTO ue_req;
-        IF(ue_prereq.numero_bloc >= ue_req.numero_bloc) THEN
+        SELECT ue1.* FROM projet.unites_enseignement ue1 WHERE ue1.id_ue = NEW.ue_requise INTO ue_requise1;
+        SELECT ue2.* FROM projet.unites_enseignement ue2 WHERE ue2.id_ue = NEW.ue_qui_requiert INTO ue_qui_requiert1;--
+        IF(ue_requise1.numero_bloc >= ue_qui_requiert1.numero_bloc) THEN
             RAISE 'Le bloc de l unite d enseignement doit etre inferieurs a celle requise';
         END IF;
         RETURN NEW;
