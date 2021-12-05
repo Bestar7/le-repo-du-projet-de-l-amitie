@@ -312,7 +312,7 @@ CREATE OR REPLACE FUNCTION projet.ajouter_prerequis(ue_qui_requiert varchar,ue_r
         code_requise ALIAS FOR $2;
     BEGIN
         INSERT INTO projet.prerequis (ue_qui_requiert, ue_requise)
-        SELECT ue_requise.id_ue, ue_requiert.id_ue
+        SELECT ue_requiert.id_ue, ue_requise.id_ue
         FROM projet.unites_enseignement ue_requise, projet.unites_enseignement ue_requiert
         WHERE ue_requise.code = code_requise
         AND ue_requiert.code = code_qui_requiert;
