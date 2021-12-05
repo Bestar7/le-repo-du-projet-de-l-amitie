@@ -191,17 +191,17 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION projet.update_nbr_credit_valide() RETURNS TRIGGER AS $$
 BEGIN
     --ajoute les credit si acqui
-    UPDATE projet.etudiants
-    SET nbr_credit_valide = nbr_credit_valide +
-                            (SELECT ue.nbr_credit
-                            FROM projet.unites_enseignement ue
-                            WHERE ue.code = NEW.ue)
-    WHERE etudiants.numero_etudiant = NEW.etudiant;
-    RETURN NEW;
+	UPDATE projet.etudiants
+	SET nbr_credit_valide = nbr_credit_valide + 
+		(SELECT ue.nbr_credit
+		FROM projet.unites_enseignement ue
+		WHERE ue.id_ue = NEW.ue)
+	WHERE numero_etudiant = NEW.etudiant;
+	RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trigger_nbr_credit_valide AFTER UPDATE ON projet.acquis
+CREATE TRIGGER trigger_nbr_credit_valide AFTER INSERT ON projet.acquis
 FOR EACH ROW EXECUTE PROCEDURE projet.update_nbr_credit_valide();
 
 
@@ -229,16 +229,41 @@ CREATE OR REPLACE FUNCTION projet.verifie_ajouter_pae_ue() RETURNS TRIGGER AS $$
         SELECT ue.* FROM projet.unites_enseignement ue WHERE ue.id_ue = NEW.ue INTO ue_ajout;
         SELECT p.* FROM projet.paes p  WHERE p.etudiant = NEW.etudiant INTO etud;
 
-        IF(etud.est_valide)then
-            RAISE'PAE déjà valide';
-        ELSIF(SELECT * FROM projet.acquis a WHERE a.etudiant =  etud.etudiant AND a.ue = ue_ajout.id_ue IN (SELECT * FROM projet.acquis a WHERE a.etudiant = etud.etudiant)) then
-            RAISE'UE déjà acquise';
-        ELSIF(SELECT p.ue_requise FROM projet.prerequis p WHERE p.ue_qui_requiert = ue_ajout NOT IN (SELECT a.ue FROM projet.acquis a WHERE a.etudiant = etud.etudiant))then
-            RAISE'Toutes les prerequis ne sont pas acquis';
-        ELSIF((SELECT e.nbr_credit_valide FROM projet.etudiants e WHERE e.numero_etudiant = etud.etudiant) < 30 AND ue_ajout.numero_bloc <> 1)then
-            RAISE'Vous ne pouvez avoir que des cours du bloc 1';
-        END IF;
-        RETURN NEW;
+	IF(etud.est_valide)then
+		RAISE 'PAE déjà valide';
+	ELSIF EXISTS
+		(SELECT a1.*
+		FROM projet.acquis a1
+		WHERE a1.etudiant = etud.etudiant 
+		AND ue_ajout.id_ue = a1.ue)--IN 
+	THEN
+		RAISE 'UE déjà acquise';
+	ELSIF
+		ue_ajout.numero_bloc <> 1
+		AND
+		(SELECT e.nbr_credit_valide 
+		FROM projet.etudiants e 
+		WHERE e.numero_etudiant = etud.etudiant) < 30
+	THEN
+		RAISE 'Vous ne pouvez avoir que des cours du bloc 1';
+	ELSIF EXISTS 
+		(SELECT p.ue_qui_requiert
+		FROM projet.prerequis p
+		WHERE p.ue_qui_requiert = ue_ajout.id_ue)
+	THEN
+		IF EXISTS -- change this
+			(SELECT p.ue_requise 
+			FROM projet.prerequis p
+			WHERE p.ue_qui_requiert = ue_ajout.id_ue
+			AND p.ue_requise NOT IN
+				(SELECT a.ue 
+				FROM projet.acquis a 
+				WHERE a.etudiant = etud.etudiant))
+		THEN
+			RAISE'Toutes les prerequis ne sont pas acquis'; -- pas ok mtn
+		END IF;
+	END IF;
+	RETURN NEW;
     END;
 $$LANGUAGE plpgsql;
 
@@ -401,7 +426,7 @@ CREATE OR REPLACE FUNCTION projet.retirer_ue_pae(code_ue_retirer varchar, id_etu
         DELETE FROM projet.pae_ue pu
         WHERE pu.etudiant = id_etud
         AND pu.ue = (
-            SELECT *
+            SELECT ue.id_ue
             FROM projet.unites_enseignement ue
             WHERE ue.code = code_ue_retirer);
     END;
@@ -411,7 +436,7 @@ CREATE TRIGGER trigger_verifie_retirer_ue_pae BEFORE DELETE ON projet.pae_ue
     FOR EACH ROW EXECUTE PROCEDURE projet.verifie_retirer_pae_ue();
 
 --Valider son PAE
-CREATE OR REPLACE FUNCTION projet.valider_pae(num_etudiant varchar) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION projet.valider_pae(num_etudiant int) RETURNS VOID AS $$
     DECLARE
         num_etud ALIAS FOR $1;
     BEGIN
