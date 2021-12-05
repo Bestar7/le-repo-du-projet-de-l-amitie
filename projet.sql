@@ -4,9 +4,6 @@ CREATE SCHEMA projet;
 CREATE TABLE projet.blocs (
     numero_bloc int PRIMARY KEY CHECK (numero_bloc>=1 AND numero_bloc <=3)
 );
-INSERT INTO projet.blocs VALUES (1);
-INSERT INTO projet.blocs VALUES (2);
-INSERT INTO projet.blocs VALUES (3);
 
 CREATE SEQUENCE projet.seq_etudiant;
 CREATE TABLE projet.etudiants (
