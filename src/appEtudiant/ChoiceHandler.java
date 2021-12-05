@@ -44,7 +44,7 @@ public class ChoiceHandler {
         	ueRetrait = conn.prepareStatement("SELECT projet.retirer_ue_pae(?,?);");
             //3.
         	validation = conn.prepareStatement("SELECT projet.valider_pae(?);");
-            //4.
+            //4.DONE
         	ueDispo = conn.prepareStatement("SELECT * FROM projet.afficher_ue_inscrivable WHERE \"Numero Etudiant\" = ?;");
             //5.
         	visuPae = conn.prepareStatement("SELECT * FROM projet.afficher_pae WHERE \"Numero Etudiant\" = ?;");
@@ -95,15 +95,15 @@ public class ChoiceHandler {
             e.printStackTrace();
         }
     }
-    private PreparedStatement ueDispo; //4.TODO ajouter le num de l'etudiant ï¿½ la requï¿½te
+    private PreparedStatement ueDispo; //4.DONE
     public void afficherUeDispo() {
         try {
         	ueDispo.setInt(1, numeroUser);
         	
         	try (ResultSet rs = ueDispo.executeQuery()) {
                 while (rs.next()) {
-                    System.out.println("  "+rs.getString("code")+" "+
-                            rs.getString("nom")+"\tavec "+rs.getString("nbr_inscrit")+" inscrit(s)");
+                    System.out.println("  "+rs.getString("code")+" bloc "+rs.getInt("numero_bloc")+" "+
+                            rs.getString("nom")+"\tavec "+rs.getString("nbr_credit")+" crédits");
                 }
             }
         } catch (SQLException e) {
@@ -112,14 +112,13 @@ public class ChoiceHandler {
     }
     private PreparedStatement visuPae; //5.TODO ajouter le num de l'etudiant ï¿½ la requï¿½te
     public void visualiserPae() {
-        System.out.println("numero du bloc : ");
         try {
         	visuPae.setInt(1, numeroUser);
         	
             try (ResultSet rs = visuPae.executeQuery()) {
                 while (rs.next()) {
-                    System.out.println("  "+rs.getString("code")+" "+
-                            rs.getString("nom")+"\tavec "+rs.getString("nbr_inscrit")+" inscrit(s)");
+                    System.out.println("  "+rs.getString("code")+" bloc "+rs.getInt("numero_bloc")+" "+
+                            rs.getString("nom")+"\tavec "+rs.getString("nbr_credit")+" crédits");
                 }
             }
         } catch (SQLException e) {
