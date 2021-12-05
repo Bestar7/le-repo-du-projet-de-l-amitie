@@ -45,9 +45,9 @@ public class ChoiceHandler {
             //3.
         	validation = conn.prepareStatement("SELECT projet.valider_pae(?);");
             //4.
-        	ueDispo = conn.prepareStatement("SELECT projet.afficher_ue_inscrivable(?);");
+        	ueDispo = conn.prepareStatement("SELECT * FROM projet.afficher_ue_inscrivable WHERE \"Numero Etudiant\" = ?;");
             //5.
-        	visuPae = conn.prepareStatement("SELECT projet.afficher_pae(?);");
+        	visuPae = conn.prepareStatement("SELECT * FROM projet.afficher_pae WHERE \"Numero Etudiant\" = ?;");
             //6.
             reinitPae = conn.prepareStatement("SELECT projet.reinitialiser_pae(?);");
         } catch (SQLException e) {
@@ -129,6 +129,8 @@ public class ChoiceHandler {
     private PreparedStatement reinitPae; //6.TODO ajouter le num de l'etudiant � la requ�te
     public void reinitialiserPae() {
         try {
+        	reinitPae.setInt(1, numeroUser);
+        	
         	reinitPae.executeQuery();
         } catch (SQLException e) {
             e.printStackTrace();
