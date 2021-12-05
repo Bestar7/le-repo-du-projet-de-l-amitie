@@ -55,10 +55,10 @@ public class ChoiceHandler {
         String nom = scanner.nextLine();
 
         System.out.println("Nombre de crédit de la nouvelle UE : ");
-        int nbrCredit = scanner.nextInt();
+        int nbrCredit = Integer.parseInt(scanner.nextLine()); // cela evite les probleme de retour à la ligne pas pris avec nextInt
 
         System.out.println("Numéro de bloc de la nouvelle UE : ");
-        int numBloc = scanner.nextInt();
+        int numBloc = Integer.parseInt(scanner.nextLine()); // cela evite les probleme de retour à la ligne pas pris avec nextInt
 
         try {
             ue.setString(1, code);
@@ -137,7 +137,7 @@ public class ChoiceHandler {
     private PreparedStatement etudiantBloc; // 5.DONE
     public void visuEtudiantBloc() {
         System.out.println("numéro du bloc : ");
-        int numBloc = scanner.nextInt();
+        int numBloc = Integer.parseInt(scanner.nextLine()); // cela evite les probleme de retour à la ligne pas pris avec nextInt
 
         try {
             etudiantBloc.setInt(1, numBloc);
@@ -189,7 +189,7 @@ public class ChoiceHandler {
     private PreparedStatement ueBloc; //8.DONE
     public void visuUeBloc() {
         System.out.println("numero du bloc : ");
-        int numBloc = scanner.nextInt();
+        int numBloc = Integer.parseInt(scanner.nextLine()); // cela evite les probleme de retour à la ligne pas pris avec nextInt
 
         try {
             ueBloc.setInt(1, numBloc);

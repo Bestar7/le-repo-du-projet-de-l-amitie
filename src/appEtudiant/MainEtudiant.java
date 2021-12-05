@@ -18,7 +18,8 @@ public class MainEtudiant {
 
 
 	public MainEtudiant(){
-		DB db = new DB("tanguyraskin","67DTB.!?8H0" ); // joachimbastin IQXR6CLVW
+		//DB db = new DB("tanguyraskin","67DTB.!?8H0" ); // joachimbastin IQXR6CLVW
+		DB db = new DB("postgres","Mcs1ap65" ); // pour test que tout (sauf grant) fonctionne
 
 		System.out.println("Veuillez entrer votre email");
 		String user = scanner.nextLine();
@@ -41,7 +42,7 @@ public class MainEtudiant {
 
 	private static void printChoicesEtudiant() {
 		// affichage choix
-		System.out.println("Voici les options : ");
+		System.out.println("\nVoici les options : ");
 		for (int i=1; i<=OPTIONS.length; i++) {
 			System.out.println(i+"."+OPTIONS[i-1]);
 			}

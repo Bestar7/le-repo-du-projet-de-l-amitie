@@ -42,7 +42,7 @@ public class MainCentral {
 
     private static void printChoicesEtudiant() {
         // affichage choix
-        System.out.println("Voici les options : ");
+        System.out.println("\nVoici les options : ");
         for (int i=1; i<=OPTIONS.length; i++) {
             System.out.println(i+"."+OPTIONS[i-1]);
         }
